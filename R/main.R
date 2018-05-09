@@ -92,6 +92,8 @@ sim_genotypes <- function(proj) {
   # check inputs
   assert_covfefe_project(proj)
 
-  message("foobar")
-
+  # run efficient C++ function
+  output_raw <- sim_genotypes_cpp(proj)
+  
+  return(output_raw)
 }

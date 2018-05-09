@@ -5,20 +5,21 @@
 
 using namespace Rcpp;
 
-// dummy1_cpp
-Rcpp::List dummy1_cpp(Rcpp::List args);
-RcppExport SEXP _covfefe_dummy1_cpp(SEXP argsSEXP) {
+// sim_genotypes_cpp
+Rcpp::List sim_genotypes_cpp(Rcpp::List proj, Rcpp::List args);
+RcppExport SEXP _covfefe_sim_genotypes_cpp(SEXP projSEXP, SEXP argsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List >::type proj(projSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type args(argsSEXP);
-    rcpp_result_gen = Rcpp::wrap(dummy1_cpp(args));
+    rcpp_result_gen = Rcpp::wrap(sim_genotypes_cpp(proj, args));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_covfefe_dummy1_cpp", (DL_FUNC) &_covfefe_dummy1_cpp, 1},
+    {"_covfefe_sim_genotypes_cpp", (DL_FUNC) &_covfefe_sim_genotypes_cpp, 2},
     {NULL, NULL, 0}
 };
 

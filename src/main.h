@@ -2,5 +2,5 @@
 #include <Rcpp.h>
 
 //------------------------------------------------
-// Example function
-Rcpp::List dummy1_cpp(Rcpp::List args);
+// Simulate genotypes
+Rcpp::List sim_genotypes_cpp(Rcpp::List proj, Rcpp::List args);
