@@ -14,9 +14,7 @@ covfefe_infected_durations <- function(name) {
 
   # load file from inst/extdata folder
   name_full <- system.file("extdata/", name, package='covfefe', mustWork = TRUE)
-  data_raw <- readLines(name_full)
-  ret <- mapply(function(x) {as.numeric(strsplit(x, ",")[[1]])}, data_raw)
-  names(ret) <- NULL
+  ret <- readRDS(name_full)
 
   # return
   return(ret)
