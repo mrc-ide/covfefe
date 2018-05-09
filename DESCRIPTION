@@ -15,4 +15,5 @@ Imports:
     assertthat
 SystemRequirements: C++11
 RoxygenNote: 6.0.1
-Suggests: testthat
+Suggests: testthat,
+    covr

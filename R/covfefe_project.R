@@ -28,8 +28,9 @@ covfefe_project <- function(recom_rate = 1e-2, bloodstage_skew = 1, biting = dpo
   # create new project
   ret <- list(parameters = parameters,
               distributions = distributions,
-              infected_durations = NULL,
-              infecteds = NULL,
+              durations = NULL,
+              migrations = NULL,
+              n_infecteds = NULL,
               genotypes = NULL)
 
   # create class
@@ -46,7 +47,7 @@ covfefe_project <- function(recom_rate = 1e-2, bloodstage_skew = 1, biting = dpo
 print.covfefe_project <- function(x, ...) {
 
   # print selected elements
-  print(unclass(x)[c("parameters", "distributions", "infected_durations", "infecteds", "genotypes")])
+  print(unclass(x)[c("parameters", "distributions", "durations", "migrations", "n_infecteds", "genotypes")])
 
   invisible(x)
 }

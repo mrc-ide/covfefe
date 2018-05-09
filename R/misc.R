@@ -1,8 +1,8 @@
 
 #------------------------------------------------
-#' Import infected durations
+#' Import file
 #'
-#' Import infected durations from the inst/extdata folder of this package
+#' Import file from the inst/extdata folder of this package
 #'
 #' @param name name of file
 #'
@@ -10,7 +10,7 @@
 #' @examples
 #' # TODO
 
-covfefe_infected_durations <- function(name) {
+covfefe_file <- function(name) {
 
   # load file from inst/extdata folder
   name_full <- system.file("extdata/", name, package='covfefe', mustWork = TRUE)
