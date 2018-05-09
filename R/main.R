@@ -92,8 +92,11 @@ sim_genotypes <- function(proj) {
   # check inputs
   assert_covfefe_project(proj)
 
+  # create additional arguments
+  args <- list(demes = length(proj$durations))
+  
   # run efficient C++ function
-  output_raw <- sim_genotypes_cpp(proj)
+  output_raw <- sim_genotypes_cpp(proj, args)
   
   return(output_raw)
 }
