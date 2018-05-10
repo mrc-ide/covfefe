@@ -11,6 +11,30 @@
 NULL
 
 #------------------------------------------------
+#' Bind mosquito lag durations to project
+#'
+#' Bind mosquito lag durations to project. Values of -1 indicate that this infected host should have genotypes generated de novo, rather than from another host in this simulation.
+#'
+#' @param proj the current project
+#' @param lags lag durations
+#'
+#' @export
+#' @examples
+#' # TODO
+
+bind_lags <- function(proj, lags) {
+  
+  # check inputs
+  assert_covfefe_project(proj)
+  
+  # bind mosquito lag durations to project
+  proj$lags <- lags
+  
+  # return project
+  return(proj)
+}
+
+#------------------------------------------------
 #' Bind infected durations to project
 #'
 #' Bind infected durations to project
@@ -89,14 +113,23 @@ bind_migrations <- function(proj, migrations) {
 
 sim_genotypes <- function(proj) {
 
-  # check inputs
+  # check arguments
   assert_covfefe_project(proj)
 
-  # create additional arguments
-  args <- list(demes = length(proj$durations))
+  # get useful parameters
+  demes <- length(proj$durations)
+  max_time <- length(proj$durations[[1]])
+  
+  # define argument list
+  args <- list(parameters = proj$parameters,
+               durations = proj$durations,
+               migrations = array_to_rcpp(proj$migrations),
+               demes = demes,
+               max_time = max_time
+               )
   
   # run efficient C++ function
-  output_raw <- sim_genotypes_cpp(proj, args)
+  output_raw <- sim_genotypes_cpp(args)
   
   return(output_raw)
 }

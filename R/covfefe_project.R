@@ -28,6 +28,7 @@ covfefe_project <- function(recom_rate = 1e-2, bloodstage_skew = 1, biting = dpo
   # create new project
   ret <- list(parameters = parameters,
               distributions = distributions,
+              lags = NULL,
               durations = NULL,
               migrations = NULL,
               n_infecteds = NULL,

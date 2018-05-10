@@ -7,21 +7,19 @@ using namespace std;
 //------------------------------------------------
 // Simulate genotypes
 // [[Rcpp::export]]
-Rcpp::List sim_genotypes_cpp(Rcpp::List proj, Rcpp::List args) {
+Rcpp::List sim_genotypes_cpp(Rcpp::List args) {
 
   // print message to console
   Rcpp::Rcout << "running C++ dummy1_cpp function \n";
   
   // get input arguments
-  Rcpp::List proj_parameters = proj("parameters");
+  Rcpp::List args_parameters = args("parameters");
   
-  double r = Rcpp::as<double>(proj_parameters("recom_rate"));
+  double r = Rcpp::as<double>(args_parameters("recom_rate"));
   int demes = Rcpp::as<int>(args("demes"));
-  vector<vector<vector<int>>> durations = rcpp_to_array_int(proj("durations"));
-  vector<vector<vector<int>>> migrations = rcpp_to_array_int(proj("migrations"));
-  int max_time = durations[0].size() - 1;
-  
-  print_array(migrations);
+  int max_time = Rcpp::as<int>(args("max_time"));
+  vector<vector<vector<int>>> durations = rcpp_to_array_int(args("durations"));
+  vector<vector<vector<int>>> migrations = rcpp_to_array_int(args("migrations"));
   
   // initialise human hosts in each deme
   vector<vector<host>> y(demes);
