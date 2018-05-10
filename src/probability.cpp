@@ -31,6 +31,15 @@ int rbinom1(const int n, const double p) {
 }
 
 //------------------------------------------------
+// draw from Multinomial(n, p) distribution
+vector<int> rmultinom1(const int n, vector<double> &p) {
+  int k = p.size();
+  vector<int> ret(k);
+  R::rmultinom(n, &p[0], k, &(ret)[0]);
+  return ret;
+}
+
+//------------------------------------------------
 // sample single value from given probability vector that sums to p_sum
 int sample1(const vector<double> &p, const double p_sum) {
   double rand = p_sum*runif_0_1();

@@ -80,6 +80,11 @@ vector<int> seq_int(int from, int to, int by) {
 }
 
 //------------------------------------------------
+// push back multiple values to vector
+// push_back_multiple
+// DEFINED IN HEADER
+
+//------------------------------------------------
 // converts input from Rcpp::List format to vector<int> format.
 vector<int> rcpp_to_vector_int(SEXP x) {
     return Rcpp::as<vector<int> >(x);

@@ -100,6 +100,13 @@ void foobar(int n=0);
 std::vector<int> seq_int(int from, int to, int by=1);
 
 //------------------------------------------------
+// push back multiple values to vector
+template<class TYPE>
+void push_back_multiple(std::vector<TYPE> &lhs, std::vector<TYPE> &rhs) {
+  lhs.insert(lhs.end(), rhs.begin(), rhs.end());
+}
+
+//------------------------------------------------
 // converts input from Rcpp::List format to vector<int> format.
 std::vector<int> rcpp_to_vector_int(SEXP x);
 

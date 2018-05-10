@@ -20,6 +20,10 @@ bool rbernoulli1(const double p);
 int rbinom1(const int n, const double p);
 
 //------------------------------------------------
+// draw from Multinomial(n, p) distribution
+std::vector<int> rmultinom1(const int n, std::vector<double> &p);
+
+//------------------------------------------------
 // sample single value from given probability vector that sums to p_sum
 int sample1(const std::vector<double> &p, const double pSum=1.0);
 

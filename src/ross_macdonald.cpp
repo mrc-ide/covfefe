@@ -23,7 +23,15 @@ Rcpp::List ross_macdonald_cpp(Rcpp::List args) {
   vector<int> Iv_init = Rcpp::as<vector<int>>(args["Iv_init"]);
   vector<int> H = Rcpp::as<vector<int>>(args["H"]);
   vector<int> M = Rcpp::as<vector<int>>(args["M"]);
+  vector<vector<double>> mig = Rcpp::as<vector<vector<double>>>(args["migration_matrix"]);
   int demes = Rcpp::as<int>(args["demes"]);
+  
+  // store duration of all infections. infection_time is a vector over demes, 
+  // then over times. First element holds time of infection, second element 
+  // holds deme of infection. These values can eventually be used to calculate
+  // the duration of infection
+  vector<vector<pair<int, int>>> infection_time(demes);
+  vector<vector<vector<int>>> durations(demes, vector<vector<int>>(max_time));
   
   // define and initialise model states
   vector<int> Sh(demes);
@@ -35,6 +43,9 @@ Rcpp::List ross_macdonald_cpp(Rcpp::List args) {
   for (int k=0; k<demes; k++) {
     Sh[k] = H[k] - Ih_init[k];
     Sv[k] = M[k] - Iv_init[k];
+    for (int j=0; j<Ih_init[k]; j++) {
+      infection_time[k].push_back(make_pair(0,k));
+    }
   }
   
   // vectors for storing model states in all demes, at all points in time. Note
@@ -74,6 +85,11 @@ Rcpp::List ross_macdonald_cpp(Rcpp::List args) {
   double prob_h_recovery = 1 - exp(-r);
   double prob_v_death = 1 - exp(-mu);
   
+  // initialise objects for implementing migration
+  vector<vector<int>> mig_events(demes, vector<int>(demes));
+  vector<vector<vector<int>>> mig_events_store(max_time, mig_events);
+  vector<vector<pair<int, int>>> mig_infection_time(demes);
+  
   // carry out simulation loop
   for (int i=1; i<max_time; i++) {
     
@@ -81,6 +97,37 @@ Rcpp::List ross_macdonald_cpp(Rcpp::List args) {
     u_buffer_index = (u_buffer_index==u) ? 0 : u_buffer_index+1;
     u_buffer_index_delay = (u_buffer_index_delay==u) ? 0 : u_buffer_index_delay+1;
     v_buffer_index = (v_buffer_index==v) ? 0 : v_buffer_index+1;
+    
+    // implement migration
+    // clear temporary object for storing infection times of migrating hosts
+    for (int k=0; k<demes; k++) {
+      mig_infection_time[k].clear();
+    }
+    // schedule human hosts to be moved
+    for (int k1=0; k1<demes; k1++) {
+      mig_events[k1] = rmultinom1(Ih[k1], mig[k1]);
+      mig_events[k1][k1] = 0;
+      
+      // move this many infection times to the temporary object
+      for (int k2=0; k2<demes; k2++) {
+        if (k2==k1) {
+          continue;
+        }
+        for (int j=0; j<mig_events[k1][k2]; j++) {
+          int rnd1 = sample2(0, infection_time[k1].size()-1);
+          mig_infection_time[k2].push_back(infection_time[k1][rnd1]);
+          infection_time[k1].erase(infection_time[k1].begin() + rnd1);
+        }
+      }
+    }
+    mig_events_store[i] = mig_events;
+    // move human hosts
+    for (int k1=0; k1<demes; k1++) {
+      for (int k2=0; k2<demes; k2++) {
+        Ih[k1] += mig_events[k2][k1] - mig_events[k1][k2];
+      }
+      infection_time[k1].insert(infection_time[k1].end(), mig_infection_time[k1].begin(), mig_infection_time[k1].end());
+    }
     
     // loop through all demes
     for (int k=0; k<demes; k++) {
@@ -103,6 +150,17 @@ Rcpp::List ross_macdonald_cpp(Rcpp::List args) {
       Eh[k] += Eh_list[k][u_buffer_index] - Eh_list[k][u_buffer_index_delay]; // update Eh
       
       Ih[k] += Eh_list[k][u_buffer_index_delay] - h_recovery; // update Ih
+      
+      // update infection times. Add new infections and drop those that recover
+      for (int j=0; j<h_infection; j++) {
+        infection_time[k].push_back(make_pair(i,k));
+      }
+      for (int j=0; j<h_recovery; j++) {
+        int rnd1 = sample2(0, infection_time[k].size()-1);
+        int time_interval = i - infection_time[k][rnd1].first;
+        durations[infection_time[k][rnd1].second][infection_time[k][rnd1].first].push_back(time_interval);
+        infection_time[k].erase(infection_time[k].begin() + rnd1);
+      }
       
       // mosquito events
       int v_infection_or_death = rbinom1(Sv[k], prob_v_infection_or_death); // mosquito infection or death in Sv state (competing hazards)
@@ -141,11 +199,20 @@ Rcpp::List ross_macdonald_cpp(Rcpp::List args) {
     } // end loop over demes
   } // end loop over time
   
+  // finalise durations
+  for (int k=0; k<demes; k++) {
+    for (int j=0; j<int(infection_time[k].size()); j++) {
+      durations[infection_time[k][j].second][infection_time[k][j].first].push_back(-1);
+    }
+  }
+  
   // return values
   return Rcpp::List::create(Rcpp::Named("Sh")=Sh_store,
                             Rcpp::Named("Eh")=Eh_store,
                             Rcpp::Named("Ih")=Ih_store,
                             Rcpp::Named("Sv")=Sv_store,
                             Rcpp::Named("Ev")=Ev_store,
-                            Rcpp::Named("Iv")=Iv_store);
+                            Rcpp::Named("Iv")=Iv_store,
+                            Rcpp::Named("durations")=durations,
+                            Rcpp::Named("migrations")=mig_events_store);
 }

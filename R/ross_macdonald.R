@@ -84,10 +84,14 @@ ross_macdonald <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 2
   names(model_states) <- paste0("deme", 1:demes)
   
   # get durations
-  durations = -9
+  durations <- output_raw$durations
+  
+  # get migrations
+  migrations <- lapply(output_raw$migrations, function(x){matrix(unlist(x), demes, byrow = TRUE)})
   
   # return as list
   ret <- list(model_states = model_states,
-              durations = durations)
+              durations = durations,
+              migrations = migrations)
   return(ret)
 }
