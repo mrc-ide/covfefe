@@ -42,7 +42,8 @@ ross_macdonald <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 2
   assert_same_length(Ih_init, Iv_init, H, M)
   assert_bounded(migration_matrix)
   assert_symmetric_matrix(migration_matrix)
-  assert_that(nrow(migration_matrix) == length(H))
+  assert_that(nrow(migration_matrix) == length(H), msg = sprintf("migration matrix must have '%s' rows and columns to match other inputs", length(H)))
+  assert_that(all(rowSums(migration_matrix) == 1), msg = "each row of migration matrix must sum to 1")
   
   # get useful values
   demes <- length(H)
@@ -60,6 +61,7 @@ ross_macdonald <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 2
                Iv_init = Iv_init,
                H = H,
                M = M,
+               migration_matrix = mat_to_rcpp(migration_matrix),
                demes = demes
                )
   

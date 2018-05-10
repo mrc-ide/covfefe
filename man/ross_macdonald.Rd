@@ -6,7 +6,7 @@
 \usage{
 ross_macdonald(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22,
   v = 10, r = 1/200, b = 1, c = 1, Ih_init = 10, Iv_init = 0,
-  H = 100, M = 100)
+  H = 100, M = 100, migration_matrix = matrix(0))
 }
 \arguments{
 \item{max_time}{run simulation for this many days}
@@ -27,17 +27,15 @@ ross_macdonald(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22,
 
 \item{c}{probability a mosquito becomes infected after biting an infected human.}
 
-\item{Ih_init}{initial number of infectious humans.}
+\item{Ih_init}{initial number of infectious humans in each deme.}
 
-\item{Iv_init}{initial number of infectious mosquitoes.}
+\item{Iv_init}{initial number of infectious mosquitoes in each deme.}
 
-\item{H}{human population size.}
+\item{H}{human population size in each deme.}
 
-\item{M}{mosquito population size (number of adult female mosquitoes).}
+\item{M}{mosquito population size (number of adult female mosquitoes) in each deme.}
 
-\item{Eh_init}{initial number of infected but not infectious humans.}
-
-\item{Ev_init}{initial number of infected but not yet infectious mosquitoes.}
+\item{migration_matrix}{matrix giving the probability of migrating from current deme (rows) to new deme (columns).}
 }
 \description{
 Draws from synchronous stochastic Ross-Macdonald model

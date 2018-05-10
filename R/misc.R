@@ -20,8 +20,16 @@ covfefe_file <- function(name) {
   return(ret)
 }
 
+# -----------------------------------
+# convert matrix to list format for use within Rcpp code
+# (not exported)
+
+mat_to_rcpp <- function(x) {
+  return(split(x, f = 1:nrow(x)))
+}
+
 #------------------------------------------------
-# convert 3-dimensional array to list of lists
+# convert 3-dimensional array to list format for use within Rcpp code
 # (not exported)
 
 array_to_rcpp <- function(a) {
