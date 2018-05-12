@@ -28,7 +28,7 @@ assert_pos <- function(x, zero_allowed = TRUE, name = deparse(substitute(x))) {
 # is integer
 assert_int <- function(x, name = deparse(substitute(x))) {
   assert_numeric(x, name)
-  if (!all.equal(x, as.integer(x))) {
+  if (!isTRUE(all.equal(x, as.integer(x)))) {
     stop(sprintf("'%s' must be integer valued", name), call. = FALSE)
   }
   return(TRUE)

@@ -24,6 +24,10 @@ int rbinom1(const int n, const double p);
 std::vector<int> rmultinom1(const int n, std::vector<double> &p);
 
 //------------------------------------------------
+// draw from Geometric(p) distribution
+int rgeom1(const double p);
+
+//------------------------------------------------
 // sample single value from given probability vector that sums to p_sum
 int sample1(const std::vector<double> &p, const double pSum=1.0);
 

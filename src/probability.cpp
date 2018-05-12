@@ -40,6 +40,12 @@ vector<int> rmultinom1(const int n, vector<double> &p) {
 }
 
 //------------------------------------------------
+// draw from Geometric(p) distribution
+int rgeom1(const double p) {
+  return R::rgeom(p);
+}
+
+//------------------------------------------------
 // sample single value from given probability vector that sums to p_sum
 int sample1(const vector<double> &p, const double p_sum) {
   double rand = p_sum*runif_0_1();

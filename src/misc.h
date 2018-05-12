@@ -4,6 +4,17 @@
 #include <Rcpp.h>
 
 //------------------------------------------------
+// basic sum over elements in a vector (templated for different data types).
+template<class TYPE>
+TYPE sum(std::vector<TYPE> &x) {
+  TYPE output = 0;
+  for (int i=0; i<int(x.size()); i++) {
+    output += x[i];
+  }
+  return output;
+}
+
+//------------------------------------------------
 // helper function for printing a single value or series of values (templated for different data types)
 template<class TYPE>
 void print(TYPE x) {

@@ -4,6 +4,11 @@
 using namespace std;
 
 //------------------------------------------------
+// basic sum over elements in a vector (templated for different data types)
+// sum
+// DEFINED IN HEADER
+
+//------------------------------------------------
 // helper function for printing a single value (templated for different data types)
 // print
 // DEFINED IN HEADER

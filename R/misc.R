@@ -28,6 +28,14 @@ mat_to_rcpp <- function(x) {
   return(split(x, f = 1:nrow(x)))
 }
 
+# -----------------------------------
+# convert Rcpp list format to matrix
+# (not exported)
+
+rcpp_to_mat <- function(x) {
+  return(matrix(unlist(x), length(x), byrow = TRUE))
+}
+
 #------------------------------------------------
 # convert 3-dimensional array to list format for use within Rcpp code
 # (not exported)
