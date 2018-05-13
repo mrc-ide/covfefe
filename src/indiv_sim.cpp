@@ -84,7 +84,6 @@ Rcpp::List indiv_sim_cpp(Rcpp::List args) {
           mig_hosts[k1][k2].push_back(h[k1][rnd1]);
           h[k1].erase(h[k1].begin()+rnd1);
         }
-        //print(k1, k2, mig_hosts[k1][k2].size());
       }
     }
     // move hosts

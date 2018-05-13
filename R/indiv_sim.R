@@ -50,7 +50,7 @@ indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
   assert_bounded(migration_matrix)
   demes <- length(M)
   assert_that(nrow(migration_matrix) == demes, msg = sprintf("migration matrix must have %s rows and columns to match other inputs", demes))
-  assert_that(all(rowSums(migration_matrix) == 1), msg = "each row of migration matrix must sum to 1")
+  assert_that(isTRUE(all.equal(rowSums(migration_matrix), rep(1,demes))), msg = "each row of migration matrix must sum to 1")
   
   # calculate expected human population sizes for given migration matrix
   mig_eigen <- Re(eigen(t(migration_matrix))$vectors[,1])

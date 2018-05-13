@@ -6,7 +6,8 @@
 \usage{
 indiv_sim(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22,
   v = 10, g = 10, r = 1/200, b = 1, c = 1, Ih_init = 10, H = 100,
-  M = 100, max_clonality = 5, migration_matrix = matrix(0))
+  M = 100, max_clonality = 5, migration_matrix = matrix(1),
+  H_auto = FALSE)
 }
 \arguments{
 \item{max_time}{run simulation for this many days}
@@ -36,6 +37,8 @@ indiv_sim(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22,
 \item{M}{mosquito population size (number of adult female mosquitoes) in each deme.}
 
 \item{migration_matrix}{matrix giving the probability of migrating from current deme (rows) to new deme (columns).}
+
+\item{H_auto}{if TRUE then human population sizes are chosen automatically based on the migration matrix. The total number of humans is equal to sum(H).}
 
 \item{Iv_init}{initial number of infectious mosquitoes in each deme.}
 }
