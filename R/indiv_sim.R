@@ -25,7 +25,7 @@
 #'
 #' @export
 
-indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v = 10, g = 10, r = 1/200, b = 1, c = 1, Ih_init = 10, H = 100, M = 100, max_clonality = 5, migration_matrix = matrix(1), H_auto = FALSE) {
+indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v = 10, g = 10, r = 1/200, b = 1, c = 1, Ih_init = 10, H = 100, M = 100, max_infections = 5, migration_matrix = matrix(1), H_auto = FALSE) {
   
   # check arguments
   assert_pos_int(max_time, zero_allowed = FALSE)
@@ -33,6 +33,7 @@ indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
   assert_bounded(p, left = 0, inclusive_left = FALSE)
   assert_pos(mu)
   assert_pos_int(u, zero_allowed = FALSE)
+  assert_that(max_time>=u)  # TODO - remove?
   assert_pos_int(v, zero_allowed = FALSE)
   assert_pos_int(g, zero_allowed = FALSE)
   assert_pos(r)
@@ -40,8 +41,8 @@ indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
   assert_bounded(c)
   assert_pos_int(Ih_init)
   assert_pos_int(H, zero_allowed = FALSE)
-  assert_pos_int(M, zero_allowed = FALSE)
-  assert_pos_int(max_clonality, zero_allowed = FALSE)
+  assert_pos_int(M, zero_allowed = TRUE)
+  assert_pos_int(max_infections, zero_allowed = FALSE)
   if (!H_auto) {
     assert_same_length(Ih_init, H, M)
   }
@@ -50,21 +51,44 @@ indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
   assert_bounded(migration_matrix)
   demes <- length(M)
   assert_that(nrow(migration_matrix) == demes, msg = sprintf("migration matrix must have %s rows and columns to match other inputs", demes))
-  assert_that(isTRUE(all.equal(rowSums(migration_matrix), rep(1,demes))), msg = "each row of migration matrix must sum to 1")
+  assert_that(all(rowSums(migration_matrix)<=1), msg = "row sums of migration matrix cannot exceed 1")
   
-  # calculate expected human population sizes for given migration matrix
-  mig_eigen <- Re(eigen(t(migration_matrix))$vectors[,1])
-  mig_eigen <- mig_eigen/sum(mig_eigen)
-  H_expected <- round(sum(H)*mig_eigen)
-  if (H_auto) {
-    H <- H_expected
-    message(paste0("auto human population size H = c(", paste(H, collapse=", "), ")"))
+  # fill in migration matrix diagonal elements and test if there is any migration
+  diag(migration_matrix) <- 0
+  diag(migration_matrix) <- 1 - rowSums(migration_matrix)
+  any_migration <- sum(diag(migration_matrix)) < demes
+  
+  # calculate expected human population sizes
+  if (any_migration) {
+    
+    # calculate expected human population sizes from equilibrium solution to
+    # given migration matrix
+    mig_eigen <- Re(eigen(t(migration_matrix))$vectors[,1])
+    mig_eigen <- mig_eigen/sum(mig_eigen)
+    H_expected <- round(sum(H)*mig_eigen)
+    
+    # it is still possible that H_expected is not stable due to rounding errors.
+    # Step forward until H_expected no longer changes
+    H_prev <- rep(0,demes)
+    while(any(H_expected != H_prev)) {
+      H_prev <- H_expected
+      H_expected <- round(as.vector(crossprod(H_expected, migration_matrix)))
+    }
+  } else {
+    
+    # share human hosts equally between demes
+    H_expected <- round(rep(sum(H)/demes, demes))
   }
   
-  # check that equilibrium solution of migration matrix is compatible with human
-  # population sizes
-  if (!isTRUE(all.equal(H, H_expected))) {
-    stop(paste0("migration_matrix and H incompatible. Migration with these rates will lead to H deviating over time. To rectify this, the equilibrium solution of the migration_matrix must lead to the same proportions as found in H. For the given migration matrix, the required proportions are H <- c(", paste(H_expected, collapse = ", "), ")."))
+  # set human population sizes automatically
+  if (H_auto) {
+    H <- H_expected
+  }
+  
+  # check that human population sizes unchanged after migration
+  H_stepforward <- round(as.vector(crossprod(H, migration_matrix)))
+  if (any(H != H_stepforward)) {
+    stop(paste0("migration_matrix and H incompatible. Migration with these rates will lead to H changing over time. Example stable proportions are H <- c(", paste(H_expected, collapse = ", "), ")."))
   }
   
   # calculate number of individuals that move each generation
@@ -73,16 +97,13 @@ indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
   # it is still possible that delta_mig does not represent stable migration due
   # to rounding errors Calculate discrepancies and alter matrix until 
   # completely stable
-  discrep <- rep(1,demes)
-  for (k in 1:demes) {
-    # calculate discrepancies between rows and columns
-    discrep[k] <- sum(delta_mig[k,]) - sum(delta_mig[,k])
-  }
+  discrep <- rowSums(delta_mig) - colSums(delta_mig)
   for (k in 1:(demes-1)) {
     # adjust delta_mig to reduce discrepancies
     discrep_diff <- abs(discrep[k] + discrep[(k+1):demes])
     best_diff <- k + which.min(discrep_diff)
     delta_mig[k,best_diff] <- delta_mig[k,best_diff] - discrep[k]
+    discrep <- rowSums(delta_mig) - colSums(delta_mig)
   }
   
   # define argument list
@@ -98,27 +119,33 @@ indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
                Ih_init = Ih_init,
                H = H,
                M = M,
-               max_clonality = max_clonality,
-               delta_mig = mat_to_rcpp(delta_mig),
+               max_infections = max_infections,
+               migration_matrix = mat_to_rcpp(migration_matrix),
                demes = demes
                )
   
   t0 <- Sys.time()
   
+  #print(delta_mig)
+  #print(discrep)
+  #print(cbind(rowSums(delta_mig), colSums(delta_mig), H))
+  #return(args)
+  
   # run efficient C++ function
   output_raw <- indiv_sim_cpp(args)
   
   # process output
-  clonality <- list()
+  n_bloodstage <- list()
   for (k in 1:demes) {
-    clonality[[k]] <- rcpp_to_mat(output_raw$clonality[[k]])
+    n_bloodstage[[k]] <- rcpp_to_mat(output_raw$n_bloodstage[[k]])
   }
-  line_list <- rcpp_to_mat(output_raw$line_list)
+  #line_list <- rcpp_to_mat(output_raw$line_list)
+  line_list <- -9
   
   message(sprintf("completed in %s seconds", round(Sys.time() - t0, 2)))
   
   # return as list
-  ret <- list(clonality = clonality,
+  ret <- list(n_bloodstage = n_bloodstage,
               line_list = line_list)
   return(ret)
 }

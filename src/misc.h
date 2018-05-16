@@ -15,6 +15,28 @@ TYPE sum(std::vector<TYPE> &x) {
 }
 
 //------------------------------------------------
+// sum over rows of a matrix (templated for different data types)
+template<class TYPE>
+void row_sums(std::vector<TYPE> &ret, std::vector<std::vector<TYPE>> &x) {
+  std::fill(ret.begin(), ret.end(), 0);
+  for (int i=0; i<int(x.size()); i++) {
+    ret[i] = sum(x[i]);
+  }
+}
+
+//------------------------------------------------
+// sum over cols of a matrix (templated for different data types)
+template<class TYPE>
+void col_sums(std::vector<TYPE> &ret, std::vector<std::vector<TYPE>> &x) {
+  std::fill(ret.begin(), ret.end(), 0);
+  for (int i=0; i<int(x.size()); i++) {
+    for (int j=0; j<int(x[i].size()); j++) {
+      ret[j] += x[i][j];
+    }
+  }
+}
+
+//------------------------------------------------
 // helper function for printing a single value or series of values (templated for different data types)
 template<class TYPE>
 void print(TYPE x) {

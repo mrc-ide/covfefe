@@ -29,10 +29,15 @@ int rgeom1(const double p);
 
 //------------------------------------------------
 // sample single value from given probability vector that sums to p_sum
-int sample1(const std::vector<double> &p, const double pSum=1.0);
+int sample1(std::vector<double> &p, const double pSum=1.0);
 
 //------------------------------------------------
 // sample single value x that lies between a and b (inclusive) with equal 
 // probability. Works on positive or negative values of a or b, and works 
 // irrespective of which of a or b is larger.
 int sample2(const int a, const int b);
+
+//------------------------------------------------
+// re-shuffle the order of a vector of integers
+void reshuffle(std::vector<int> &x);
+

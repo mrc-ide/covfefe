@@ -27,6 +27,9 @@ bool rbernoulli1(const double p) {
 //------------------------------------------------
 // draw from Binomial(n, p) distribution
 int rbinom1(const int n, const double p) {
+  if (n==0 || p>=1) {
+    return n;
+  }
   return R::rbinom(n, p);
 }
 
@@ -47,7 +50,7 @@ int rgeom1(const double p) {
 
 //------------------------------------------------
 // sample single value from given probability vector that sums to p_sum
-int sample1(const vector<double> &p, const double p_sum) {
+int sample1(vector<double> &p, const double p_sum) {
   double rand = p_sum*runif_0_1();
   double z = 0;
   for (int i=0; i<int(p.size()); i++) {
@@ -68,5 +71,18 @@ int sample2(const int a, const int b) {
     return floor(runif1(a, b+1));
   } else {
     return floor(runif1(b, a+1));
+  }
+}
+
+//------------------------------------------------
+// re-shuffle the order of a vector of integers
+void reshuffle(vector<int> &x) {
+  int rnd1, tmp1; // dummy variables
+  int n = x.size();
+  for (int i=0; i<n; i++) {
+    rnd1 = runif1(i,n);	// draw random index from i to end of vector. Note that although runif returns a double, by forcing to int we essentially round this value down to nearest int.
+    tmp1 = x[rnd1];		    // temporarily store current value of vector at this position
+    x[rnd1] = x[i];			// swap for value at position i
+    x[i] = tmp1;			// complete the swap
   }
 }

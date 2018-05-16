@@ -9,6 +9,16 @@ using namespace std;
 // DEFINED IN HEADER
 
 //------------------------------------------------
+// sum over rows of a matrix (templated for different data types)
+// row_sums
+// DEFINED IN HEADER
+
+//------------------------------------------------
+// sum over columns of a matrix (templated for different data types)
+// col_sums
+// DEFINED IN HEADER
+
+//------------------------------------------------
 // helper function for printing a single value (templated for different data types)
 // print
 // DEFINED IN HEADER
