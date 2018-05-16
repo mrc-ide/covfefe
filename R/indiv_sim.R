@@ -120,7 +120,7 @@ indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
                H = H,
                M = M,
                max_infections = max_infections,
-               migration_matrix = mat_to_rcpp(migration_matrix),
+               delta_mig = mat_to_rcpp(delta_mig),
                demes = demes
                )
   

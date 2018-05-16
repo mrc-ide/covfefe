@@ -25,7 +25,7 @@ Rcpp::List indiv_sim_cpp(Rcpp::List args) {
   vector<int> H = Rcpp::as<vector<int>>(args["H"]);
   vector<int> M = Rcpp::as<vector<int>>(args["M"]);
   int max_infections = Rcpp::as<int>(args["max_infections"]);
-  vector<vector<double>> mig = Rcpp::as<vector<vector<double>>>(args["migration_matrix"]);
+  vector<vector<double>> delta_mig = Rcpp::as<vector<vector<double>>>(args["delta_mig"]);
   int demes = Rcpp::as<int>(args["demes"]);
   
   double prob_h_recovery = 1 - exp(-r);
@@ -72,12 +72,8 @@ Rcpp::List indiv_sim_cpp(Rcpp::List args) {
   int v_ringbuffer_thistime = 0;
   
   // initialise objects for implementing migration
-  vector<vector<int>> delta_mig(demes, vector<int>(demes));
   vector<vector<vector<int>>> mig_noninf_hosts(demes, vector<vector<int>>(demes));
   vector<vector<vector<int>>> mig_inf_hosts(demes, vector<vector<int>>(demes));
-  vector<int> mig_order = seq_int(0,demes-1);
-  vector<int> rowsum(demes);
-  vector<int> colsum(demes);
   
   // carry out simulation loop
   for (int t=0; t<=max_time; t++) {
@@ -87,11 +83,6 @@ Rcpp::List indiv_sim_cpp(Rcpp::List args) {
     
     
     //#### MIGRATION
-    // draw number of migration events
-    //draw_migration(delta_mig, mig, H, mig_order, rowsum, colsum);
-    draw_migration2(delta_mig, mig, H, mig_order);
-    
-    
     // schedule hosts to move
     for (int k1=0; k1<demes; k1++) {
       for (int k2=0; k2<demes; k2++) {
@@ -303,210 +294,4 @@ Rcpp::List indiv_sim_cpp(Rcpp::List args) {
   return Rcpp::List::create(Rcpp::Named("n_bloodstage") = store_n_bloodstage,
                             Rcpp::Named("line_list") = -2);
 }
-
-void draw_migration2(vector<vector<int>> delta_mig, vector<vector<double>> &mig, vector<int> &H, vector<int> &mig_order) {
-  
-  // 
-  print_stars("", 50);
-  int demes = mig.size();
-  vector<int> rowsum(demes);
-  vector<int> colsum(demes);
-  vector<double> p(demes,1.0);
-  vector<double> q(demes);
-  for (int i=0; i<3; i++) {
-    
-    // draw values for row i and column i of delta_mig from binomial
-    // distribution
-    for (int j=i; j<demes; j++) {
-      int rnd1 = rbinom1(H[i]-rowsum[i], mig[i][j]/p[i]);
-      delta_mig[i][j] = rnd1;
-      rowsum[i] += rnd1;
-      colsum[j] += rnd1;
-      p[i] -= mig[i][j];
-    }
-    for (int j=i+1; j<demes; j++) {
-      int rnd1 = rbinom1(H[j]-rowsum[j], mig[j][i]/p[j]);
-      delta_mig[j][i] = rnd1;
-      rowsum[j] += rnd1;
-      colsum[i] += rnd1;
-      p[j] -= mig[j][i];
-    }
-    
-    print_matrix(delta_mig);
-    print_vector(rowsum);
-    print_vector(colsum);
-    print("");
-    if (i==2) {return;}
-    
-    // modify delta_mig
-    if (colsum[i] < rowsum[i]) {  // if need more flow in
-      int diff = rowsum[i] - colsum[i];
-      fill(q.begin(), q.end(), 0);
-      for (int j=i+1; j<demes; j++) {
-        q[j] = delta_mig[i][j];
-      }
-      double qsum = sum(q);
-      for (int z=0; z<diff; z++) {
-        int rnd1 = sample1(q, qsum) - 1;
-        delta_mig[i][rnd1]--;
-        rowsum[i]--;
-        colsum[rnd1]--;
-        q[rnd1] -= 1;
-        qsum -= 1;
-      }
-      /*
-      int diff = rowsum[i] - colsum[i];
-      fill(q.begin(), q.end(), 0);
-      for (int j=i+1; j<demes; j++) {
-        q[j] = mig[j][i]*(H[j]-rowsum[j]);
-      }
-      double qsum = sum(q);
-      for (int z=0; z<diff; z++) {
-        int rnd1 = sample1(q, qsum) - 1;
-        delta_mig[rnd1][i]++;
-        rowsum[rnd1]++;
-        colsum[i]++;
-        q[rnd1] -= mig[rnd1][i];
-        qsum -= mig[rnd1][i];
-      }
-      */
-    } else {  // if need less flow in
-      int diff = colsum[i] - rowsum[i];
-      fill(q.begin(), q.end(), 0);
-      for (int j=i+1; j<demes; j++) {
-        q[j] = delta_mig[j][i];
-      }
-      double qsum = sum(q);
-      for (int z=0; z<diff; z++) {
-        int rnd1 = sample1(q, qsum) - 1;
-        delta_mig[rnd1][i]--;
-        rowsum[rnd1]--;
-        colsum[i]--;
-        q[rnd1] -= 1;
-        qsum -= 1;
-      }
-    }
-    print_matrix(delta_mig);
-    print_vector(rowsum);
-    print_vector(colsum);
-    print("");
-    
-  }
-  
-}
-
-//------------------------------------------------
-// draw migration events
-void draw_migration(vector<vector<int>> delta_mig, vector<vector<double>> &mig, vector<int> &H, vector<int> &mig_order, vector<int> &rowsum, vector<int> &colsum) {
-  
-  // start by drawing number of events from multinomial distribution
-  int demes = mig.size();
-  for (int k1=0; k1<demes; k1++) {
-    delta_mig[k1] = rmultinom1(H[k1], mig[k1]);
-    delta_mig[k1][k1] = 0;
-  }
-  
-  // calculate excess flow out of demes
-  vector<int> excess_out(demes);
-  row_sums(rowsum, delta_mig);
-  col_sums(colsum, delta_mig);
-  int total_loss = 0;
-  for (int i=0; i<demes; i++) {
-    excess_out[i] = rowsum[i] - colsum[i];
-    total_loss += excess_out[i]*excess_out[i];
-  }
-  
-  
-  // re-shuffle order in which demes are modified
-  //reshuffle(mig_order);
-  
-  // modify delta_mig to preserve constant human population size
-  int cutout = 0;
-  while (total_loss>0) {
-    cutout++;
-    
-    // search all cells of delta_mig to find best option to modify
-    int best_i = 0;
-    int best_j = 0;
-    int best_loss_improve = 0;
-    int best_sub = 0;
-    for (int i=0; i<demes; i++) {
-      for (int j=0; j<demes; j++) {
-        if (i==j) {
-          continue;
-        }
-        if (excess_out[i]>0) {  // if excess flow out
-          // get optimal value to subtract from delta_mig[i][j]
-          int to_sub = round(0.5*(excess_out[i]-excess_out[j]));
-          to_sub = (to_sub<=delta_mig[i][j]) ? to_sub : delta_mig[i][j];
-          
-          // calculate difference in loss function
-          int new_loss = pow(excess_out[i]-to_sub, 2) + pow(excess_out[j]+to_sub, 2);
-          int old_loss = pow(excess_out[i], 2) + pow(excess_out[j], 2);
-          int loss_improve = old_loss - new_loss;
-          
-          // if best so far then keep
-          if (loss_improve >= best_loss_improve) {
-            best_loss_improve = loss_improve;
-            best_sub = to_sub;
-            best_i = i;
-            best_j = j;
-          }
-        } else if (excess_out[i]<0) {
-          // get optimal value to add to delta_mig[i][j]
-          int to_add = round(0.5*(-excess_out[i]+excess_out[j]));
-          to_add = (to_add<=(H[i]-rowsum[i])) ? to_add : (H[i]-rowsum[i]);
-          
-          // calculate difference in loss function
-          int new_loss = pow(excess_out[i]+to_add, 2) + pow(excess_out[j]-to_add, 2);
-          int old_loss = pow(excess_out[i], 2) + pow(excess_out[j], 2);
-          int loss_improve = old_loss - new_loss;
-          
-          // if best so far then keep
-          if (loss_improve >= best_loss_improve) {
-            best_loss_improve = loss_improve;
-            best_sub = -to_add;
-            best_i = i;
-            best_j = j;
-          }
-        }
-      }
-    }
-    
-    if (best_loss_improve==0 && false) {
-      print("oh dear");
-      
-      print_matrix(delta_mig);
-      print_vector(excess_out);
-      print_vector(H);
-      
-      Rcpp::stop("foobar");
-      
-    }
-    
-    // modify migration matrix
-    delta_mig[best_i][best_j] -= best_sub;
-    
-    // recalculate excess flow out of demes
-    row_sums(rowsum, delta_mig);
-    col_sums(colsum, delta_mig);
-    total_loss = 0;
-    for (int i=0; i<demes; i++) {
-      excess_out[i] = rowsum[i] - colsum[i];
-      total_loss += excess_out[i]*excess_out[i];
-    }
-    
-    if (cutout>100) {
-      
-      print_matrix(delta_mig);
-      print_vector(excess_out);
-      print_vector(H);
-      
-      Rcpp::stop("foobar");
-    }
-    
-  }
-  
-}
-
 
