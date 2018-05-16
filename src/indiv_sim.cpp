@@ -33,12 +33,15 @@ Rcpp::List indiv_sim_cpp(Rcpp::List args) {
   
   // store results
   vector<vector<int>> line_list;
+  vector<int> line_list_infection;
+  vector<int> line_list_bloodstage;
+  vector<int> line_list_recover;
   vector<vector<vector<int>>> store_n_bloodstage(demes, vector<vector<int>>(max_time+1, vector<int>(max_infections+1)));
   
   // create schedules
-  vector<vector<int>> schedule_bloodstage(max_time+1);
-  vector<vector<int>> schedule_infective(max_time+1);
-  vector<vector<pair<int, int>>> schedule_recover(max_time+1);
+  vector<vector<pair<int, int>>> schedule_bloodstage(max_time+1);
+  vector<vector<pair<int, int>>> schedule_infective(max_time+1);
+  vector<vector<tuple<int, int, int>>> schedule_recover(max_time+1);  // first=host ID, second=infection ID, third=is infective?(0=false, 1=true)
   
   // create population of human hosts
   vector<indiv_host> host(sum(H));
@@ -57,10 +60,42 @@ Rcpp::List indiv_sim_cpp(Rcpp::List args) {
   // seed initial infections
   for (int k=0; k<demes; k++) {
     for (int i=0; i<Ih_init[k]; i++) {
-      int rnd1 = sample2(0,H[k]-1);
-      int host_ID = host_noninfective[k][rnd1];
+      
+      // choose host
+      int host_ID = host_noninfective[k][i];
+      
+      // schedule blood stage
+      schedule_bloodstage[u].push_back({host_ID, 0});
+      
+      // increase number of infections
       host[host_ID].total_infections++;
-      schedule_bloodstage[u].push_back(host_ID);
+      
+      // add to infection list
+      vector<int> tmp = {host_ID, 0, -1, -1, -1};
+      push_back_multiple(line_list_infection, tmp);
+      
+    }
+  }
+  
+  // add first entries to line list
+  line_list.push_back(line_list_infection);
+  line_list.push_back(line_list_bloodstage);
+  line_list.push_back(line_list_recover);
+  
+  // store initial results
+  for (int k=0; k<demes; k++) {
+    int s = host_infective[k].size();
+    for (int i=0; i<H[k]; i++) {
+      int host_ID;
+      if (i<s) {
+        host_ID = host_infective[k][i];
+      } else {
+        host_ID = host_noninfective[k][i-s];
+      }
+      int nb = host[host_ID].n_bloodstage + host[host_ID].n_infective;
+      if (nb<=max_infections) {
+        store_n_bloodstage[k][0][nb]++;
+      }
     }
   }
   
@@ -76,7 +111,12 @@ Rcpp::List indiv_sim_cpp(Rcpp::List args) {
   vector<vector<vector<int>>> mig_inf_hosts(demes, vector<vector<int>>(demes));
   
   // carry out simulation loop
-  for (int t=0; t<=max_time; t++) {
+  for (int t=1; t<=max_time; t++) {
+    
+    // clear lists
+    line_list_infection.clear();
+    line_list_bloodstage.clear();
+    line_list_recover.clear();
     
     // update ring buffer indices
     v_ringbuffer_thistime = (v_ringbuffer_thistime==v) ? 0 : v_ringbuffer_thistime+1;
@@ -186,28 +226,38 @@ Rcpp::List indiv_sim_cpp(Rcpp::List args) {
       
       // apply new infections
       for (int i=0; i<h_infection; i++) {
-        int this_ID;
+        
+        // choose host at random
+        int host_ID;
         if (rbernoulli1(prob_h_infection_noninf)) {
           int rnd1 = sample2(0, host_noninfective[k].size()-1);
-          this_ID = host_noninfective[k][rnd1];
+          host_ID = host_noninfective[k][rnd1];
         } else {
           int rnd1 = sample2(0, host_infective[k].size()-1);
-          this_ID = host_infective[k][rnd1];
+          host_ID = host_infective[k][rnd1];
         }
         
         // skip if reached max infections
-        int nb = host[this_ID].n_bloodstage + host[this_ID].n_infective;
+        int nb = host[host_ID].n_bloodstage + host[host_ID].n_infective;
         if (nb==max_infections) {
           continue;
         }
         
-        // increase total infections
-        host[this_ID].total_infections++;
+        // choose mosquito at random
+        int rnd2 = sample2(0, Iv[k].size()-1);
+        
+        // add to infection list
+        vector<int> tmp = {host_ID, host[host_ID].total_infections, Iv[k][rnd2].first, Iv[k][rnd2].second};
+        push_back_multiple(line_list_infection, tmp);
         
         // schedule move to blood stage
         if ((t+u)<=max_time) {
-          schedule_bloodstage[t+u].push_back(this_ID);
+          schedule_bloodstage[t+u].push_back({host_ID, host[host_ID].total_infections});
         }
+        
+        // increase total infections
+        host[host_ID].total_infections++;
+        
       }
       
     } // end loop through demes
@@ -216,57 +266,67 @@ Rcpp::List indiv_sim_cpp(Rcpp::List args) {
     //#### IMPLEMENT SCHEDULED EVENTS
     // move to blood stage
     for (int i=0; i<int(schedule_bloodstage[t].size()); i++) {
-      int this_ID = schedule_bloodstage[t][i];
+      int host_ID = schedule_bloodstage[t][i].first;
+      int inf_ID = schedule_bloodstage[t][i].second;
+      
+      // add to bloodstage list
+      line_list_bloodstage.push_back(host_ID);
+      line_list_bloodstage.push_back(inf_ID);
       
       // new blood stage infection
-      host[this_ID].n_bloodstage++;
+      host[host_ID].n_bloodstage++;
       
       // schedule infective and/or recovery
       int dur = rgeom1(prob_h_recovery);
       if (dur>g) {  // if become infective prior to recovery
         if ((t+dur)<=max_time) {
-          schedule_infective[t+g].push_back(this_ID);
-          schedule_recover[t+dur].push_back({this_ID,2});
+          schedule_infective[t+g].push_back({host_ID, inf_ID});
+          schedule_recover[t+dur].push_back({host_ID, inf_ID, 1});
         } else if ((t+g)<=max_time) {
-          schedule_infective[t+g].push_back(this_ID);
+          schedule_infective[t+g].push_back({host_ID, inf_ID});
         }
       } else {  // if recover prior to become infective
         if ((t+dur)<=max_time) {
-          schedule_recover[t+dur].push_back({this_ID,1});
+          schedule_recover[t+dur].push_back({host_ID, inf_ID, 0});
         }
       }
     }
     // blood stage become infective
     for (int i=0; i<int(schedule_infective[t].size()); i++) {
-      int this_ID = schedule_infective[t][i];
+      int host_ID = schedule_infective[t][i].first;
       
       // move to infective
-      host[this_ID].n_bloodstage--;
-      host[this_ID].n_infective++;
+      host[host_ID].n_bloodstage--;
+      host[host_ID].n_infective++;
       
       // move from noninfective to infective list
-      if (host[this_ID].n_infective==1) {
-        int this_deme = host[this_ID].deme;
-        host_noninfective[this_deme].erase(remove(host_noninfective[this_deme].begin(), host_noninfective[this_deme].end(), this_ID));
-        host_infective[this_deme].push_back(this_ID);
+      if (host[host_ID].n_infective==1) {
+        int host_deme = host[host_ID].deme;
+        host_noninfective[host_deme].erase(remove(host_noninfective[host_deme].begin(), host_noninfective[host_deme].end(), host_ID));
+        host_infective[host_deme].push_back(host_ID);
       }
     }
     // recovery
     for (int i=0; i<int(schedule_recover[t].size()); i++) {
-      int this_ID = schedule_recover[t][i].first;
+      int host_ID = get<0>(schedule_recover[t][i]);
+      int inf_ID = get<1>(schedule_recover[t][i]);
+      int inf_type = get<2>(schedule_recover[t][i]);
       
-      // type 1 = blood stage recovery, type 2 = infective recovery
-      int this_type = schedule_recover[t][i].second;
-      if (this_type==1) {
-        host[this_ID].n_bloodstage--;
+      // add to recover list
+      line_list_recover.push_back(host_ID);
+      line_list_recover.push_back(inf_ID);
+      
+      // type 0 = blood stage recovery, type 1 = infective recovery
+      if (inf_type==1) {
+        host[host_ID].n_bloodstage--;
       } else {
-        host[this_ID].n_infective--;
+        host[host_ID].n_infective--;
         
         // move from infective to noninfective list
-        if (host[this_ID].n_infective==0) {
-          int this_deme = host[this_ID].deme;
-          host_infective[this_deme].erase(remove(host_infective[this_deme].begin(), host_infective[this_deme].end(), this_ID));
-          host_noninfective[this_deme].push_back(this_ID);
+        if (host[host_ID].n_infective==0) {
+          int host_deme = host[host_ID].deme;
+          host_infective[host_deme].erase(remove(host_infective[host_deme].begin(), host_infective[host_deme].end(), host_ID));
+          host_noninfective[host_deme].push_back(host_ID);
         }
       }
     }
@@ -276,22 +336,27 @@ Rcpp::List indiv_sim_cpp(Rcpp::List args) {
     for (int k=0; k<demes; k++) {
       int s = host_infective[k].size();
       for (int i=0; i<H[k]; i++) {
-        int this_ID;
+        int host_ID;
         if (i<s) {
-          this_ID = host_infective[k][i];
+          host_ID = host_infective[k][i];
         } else {
-          this_ID = host_noninfective[k][i-s];
+          host_ID = host_noninfective[k][i-s];
         }
-        int nb = host[this_ID].n_bloodstage + host[this_ID].n_infective;
+        int nb = host[host_ID].n_bloodstage + host[host_ID].n_infective;
         if (nb<=max_infections) {
           store_n_bloodstage[k][t][nb]++;
         }
       }
     }
     
+    // to line list
+    line_list.push_back(line_list_infection);
+    line_list.push_back(line_list_bloodstage);
+    line_list.push_back(line_list_recover);
+    
   } // end loop over time
   
   return Rcpp::List::create(Rcpp::Named("n_bloodstage") = store_n_bloodstage,
-                            Rcpp::Named("line_list") = -2);
+                            Rcpp::Named("line_list") = line_list);
 }
 

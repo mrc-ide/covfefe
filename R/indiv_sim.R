@@ -94,16 +94,18 @@ indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
   # calculate number of individuals that move each generation
   delta_mig <- round(outer(H, rep(1,demes)) * migration_matrix * (1-diag(1,demes)))
   
-  # it is still possible that delta_mig does not represent stable migration due
-  # to rounding errors Calculate discrepancies and alter matrix until 
-  # completely stable
-  discrep <- rowSums(delta_mig) - colSums(delta_mig)
-  for (k in 1:(demes-1)) {
-    # adjust delta_mig to reduce discrepancies
-    discrep_diff <- abs(discrep[k] + discrep[(k+1):demes])
-    best_diff <- k + which.min(discrep_diff)
-    delta_mig[k,best_diff] <- delta_mig[k,best_diff] - discrep[k]
+  if (any_migration) {
+    # it is still possible that delta_mig does not represent stable migration due
+    # to rounding errors Calculate discrepancies and alter matrix until 
+    # completely stable
     discrep <- rowSums(delta_mig) - colSums(delta_mig)
+    for (k in 1:(demes-1)) {
+      # adjust delta_mig to reduce discrepancies
+      discrep_diff <- abs(discrep[k] + discrep[(k+1):demes])
+      best_diff <- k + which.min(discrep_diff)
+      delta_mig[k,best_diff] <- delta_mig[k,best_diff] - discrep[k]
+      discrep <- rowSums(delta_mig) - colSums(delta_mig)
+    }
   }
   
   # define argument list
@@ -126,11 +128,6 @@ indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
   
   t0 <- Sys.time()
   
-  #print(delta_mig)
-  #print(discrep)
-  #print(cbind(rowSums(delta_mig), colSums(delta_mig), H))
-  #return(args)
-  
   # run efficient C++ function
   output_raw <- indiv_sim_cpp(args)
   
@@ -139,13 +136,12 @@ indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
   for (k in 1:demes) {
     n_bloodstage[[k]] <- rcpp_to_mat(output_raw$n_bloodstage[[k]])
   }
-  #line_list <- rcpp_to_mat(output_raw$line_list)
-  line_list <- -9
+  #line_list <- output_raw$line_list
   
   message(sprintf("completed in %s seconds", round(Sys.time() - t0, 2)))
   
   # return as list
   ret <- list(n_bloodstage = n_bloodstage,
-              line_list = line_list)
+              line_list = output_raw$line_list)
   return(ret)
 }
