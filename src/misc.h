@@ -140,6 +140,14 @@ void push_back_multiple(std::vector<TYPE> &lhs, std::vector<TYPE> &rhs) {
 }
 
 //------------------------------------------------
+// converts input from Rcpp::SEXP format to bool format.
+int rcpp_to_bool(SEXP x);
+
+//------------------------------------------------
+// converts input from Rcpp::SEXP format to int format.
+int rcpp_to_int(SEXP x);
+
+//------------------------------------------------
 // converts input from Rcpp::List format to vector<int> format.
 std::vector<int> rcpp_to_vector_int(SEXP x);
 

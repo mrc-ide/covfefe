@@ -5,7 +5,76 @@
 using namespace std;
 
 //------------------------------------------------
-// Simulate genotypes
+// simplify line list
+// [[Rcpp::export]]
+Rcpp::List simplify_line_list_cpp(Rcpp::List line_list, Rcpp::List args) {
+  
+  vector<int> samp_times = rcpp_to_vector_int(args["samp_times"]);
+  vector<vector<int>> samp_demes = rcpp_to_mat_int(args["samp_demes"]);
+  vector<vector<int>> samp_num = rcpp_to_mat_int(args["samp_num"]);
+  int demes = rcpp_to_int(args["demes"]);
+  int n_samp = samp_times.size();
+  int max_samp_time = samp_times[n_samp-1];
+  
+  vector<vector<unordered_set<int>>> samp_hosts(n_samp, vector<unordered_set<int>>(demes));
+  vector<map<int, int>> hosts(demes);
+  
+  int i = 0;
+  vector<int> this_line;
+  while (i<max_samp_time*4) {
+    
+    // migration
+    this_line = rcpp_to_vector_int(line_list[i]);
+    for (int j=0; j<int(this_line.size())/3; j++) {
+      int this_host = this_line[3*j];
+      int this_deme = this_line[3*j+1];
+      int new_deme = this_line[3*j+2];
+      hosts[new_deme][this_host] = hosts[this_deme][this_host];
+      hosts[this_deme].erase(this_host);
+    }
+    i++;
+    
+    // infection
+    this_line = rcpp_to_vector_int(line_list[i]);
+    for (int j=0; j<int(this_line.size())/5; j++) {
+      int this_host = this_line[5*j];
+      int this_deme = this_line[5*j+1];
+      if (hosts[this_deme].count(this_host)==0) { // new infection
+        hosts[this_deme][this_host] = 1;
+      } else {  // superinfection
+        hosts[this_deme][this_host]++;
+      }
+    }
+    i += 2; // (skip bloodstage)
+    
+    // recovery
+    this_line = rcpp_to_vector_int(line_list[i]);
+    for (int j=0; j<int(this_line.size())/3; j++) {
+      int this_host = this_line[3*j];
+      int this_deme = this_line[3*j+1];
+      if (hosts[this_deme][this_host]==1) {
+        hosts[this_deme].erase(this_host);
+      } else {
+        hosts[this_deme][this_host]--;
+      }
+    }
+    i++;
+    
+    // sample individuals
+    
+    
+    //for (auto it = hosts[0].begin(); it!=hosts[0].end(); ++it) {
+    //  Rcpp::Rcout << it->second << " ";
+    //}
+    //Rcpp::Rcout << "\n";
+  }
+  
+  Rcpp::List ret = Rcpp::List::create(Rcpp::Named("foo") = samp_times);
+  return ret;
+}
+
+//------------------------------------------------
+// simulate genotypes
 // [[Rcpp::export]]
 Rcpp::List sim_genotypes_cpp(Rcpp::List args) {
 

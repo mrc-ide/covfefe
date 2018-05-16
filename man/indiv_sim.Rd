@@ -6,7 +6,7 @@
 \usage{
 indiv_sim(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22,
   v = 10, g = 10, r = 1/200, b = 1, c = 1, Ih_init = 10, H = 100,
-  M = 100, max_clonality = 5, migration_matrix = matrix(1),
+  M = 100, max_infections = 5, migration_matrix = matrix(1),
   H_auto = FALSE)
 }
 \arguments{

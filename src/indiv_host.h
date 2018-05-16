@@ -14,6 +14,7 @@ public:
   // individual properties
   int deme;
   int total_infections;
+  int n_latent;
   int n_bloodstage;
   int n_infective;
   

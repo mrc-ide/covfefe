@@ -11,93 +11,35 @@
 NULL
 
 #------------------------------------------------
-#' Bind mosquito lag durations to project
+#' Simplify line list
 #'
-#' Bind mosquito lag durations to project. Values of -1 indicate that this infected host should have genotypes generated de novo, rather than from another host in this simulation.
+#' Simplify line list
 #'
 #' @param proj the current project
-#' @param lags lag durations
 #'
 #' @export
 #' @examples
 #' # TODO
 
-bind_lags <- function(proj, lags) {
+simplify_line_list <- function(line_list, samp_mat, demes) {
   
-  # check inputs
-  assert_covfefe_project(proj)
+  # split samp_mat into its elements
+  samp_times <- unique(samp_mat[,1])
+  samp_demes <- split(samp_mat[,2], samp_mat[,1])
+  samp_num <- split(samp_mat[,3], samp_mat[,1])
   
-  # bind mosquito lag durations to project
-  proj$lags <- lags
+  args <- list(samp_times = samp_times,
+               samp_demes = samp_demes,
+               samp_num = samp_num,
+               demes = demes)
   
-  # return project
-  return(proj)
-}
-
-#------------------------------------------------
-#' Bind infected durations to project
-#'
-#' Bind infected durations to project
-#'
-#' @param proj the current project
-#' @param durations list of infection lengths
-#'
-#' @export
-#' @examples
-#' # TODO
-
-bind_durations <- function(proj, durations) {
-
-  # check inputs
-  assert_covfefe_project(proj)
-
-  # bind durations to project
-  proj$durations <- durations
-
-  # create infecteds matrix large enough to store longest infection in any deme
-  #demes <- length(infected_durations)
-  #max_time <- max(mapply(function(y){
-  #  0:(length(y)-1) + mapply(function(x){max(0,x)}, y)
-  #  }, infected_durations))
-  #infecteds <- matrix(0, demes, max_time)
-
-  # calculate total number of infecteds at each time point in each deme
-  #for (k in 1:demes) {
-  #  n <- length(infected_durations[[k]])
-  #  start_times <- rep(0:(n-1), times = mapply(length, infected_durations[[k]]))
-  #  end_times <- start_times + unlist(infected_durations[[k]])
-  #  infecteds[k,] <- mapply(function(x){sum(start_times<=x & end_times>x)}, 0:(max_time-1))
-  #}
-
-  # binf total infecteds to project
-  #proj$infecteds <- infecteds
-
-  # return project
-  return(proj)
-}
-
-#------------------------------------------------
-#' Bind migration array to project
-#'
-#' Bind migration array to project
-#'
-#' @param proj the current project
-#' @param migrations migration array
-#'
-#' @export
-#' @examples
-#' # TODO
-
-bind_migrations <- function(proj, migrations) {
-
-  # check inputs
-  assert_covfefe_project(proj)
-
-  # bind infected durations to project
-  proj$migrations <- migrations
-
-  # return project
-  return(proj)
+  t0 <- Sys.time()
+  
+  output_raw <- simplify_line_list_cpp(line_list, args)
+  
+  message(sprintf("completed in %s seconds", round(Sys.time() - t0, 2)))
+  
+  return(output_raw)
 }
 
 #------------------------------------------------

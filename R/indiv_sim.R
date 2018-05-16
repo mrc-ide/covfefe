@@ -33,7 +33,7 @@ indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
   assert_bounded(p, left = 0, inclusive_left = FALSE)
   assert_pos(mu)
   assert_pos_int(u, zero_allowed = FALSE)
-  assert_that(max_time>=u)  # TODO - remove?
+  assert_that(max_time>=u)  # TODO - remove constraint?
   assert_pos_int(v, zero_allowed = FALSE)
   assert_pos_int(g, zero_allowed = FALSE)
   assert_pos(r)
@@ -136,7 +136,6 @@ indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
   for (k in 1:demes) {
     n_bloodstage[[k]] <- rcpp_to_mat(output_raw$n_bloodstage[[k]])
   }
-  #line_list <- output_raw$line_list
   
   message(sprintf("completed in %s seconds", round(Sys.time() - t0, 2)))
   

@@ -100,6 +100,24 @@ vector<int> seq_int(int from, int to, int by) {
 // DEFINED IN HEADER
 
 //------------------------------------------------
+// converts input from Rcpp::SEXP format to bool format.
+int rcpp_to_bool(SEXP x) {
+  return Rcpp::as<bool>(x);
+}
+
+//------------------------------------------------
+// converts input from Rcpp::SEXP format to int format.
+int rcpp_to_int(SEXP x) {
+  return Rcpp::as<int>(x);
+}
+
+//------------------------------------------------
+// converts input from Rcpp::List format to double format.
+double rcpp_to_double(SEXP x) {
+  return Rcpp::as<double>(x);
+}
+
+//------------------------------------------------
 // converts input from Rcpp::List format to vector<int> format.
 vector<int> rcpp_to_vector_int(SEXP x) {
     return Rcpp::as<vector<int> >(x);
