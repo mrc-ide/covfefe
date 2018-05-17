@@ -148,6 +148,10 @@ int rcpp_to_bool(SEXP x);
 int rcpp_to_int(SEXP x);
 
 //------------------------------------------------
+// converts input from Rcpp::SEXP format to double format.
+double rcpp_to_double(SEXP x);
+
+//------------------------------------------------
 // converts input from Rcpp::List format to vector<int> format.
 std::vector<int> rcpp_to_vector_int(SEXP x);
 
@@ -157,11 +161,11 @@ std::vector<double> rcpp_to_vector_double(SEXP x);
 
 //------------------------------------------------
 // converts input from Rcpp::List format to vector<vector<int>> format.
-std::vector<std::vector<int>> rcpp_to_mat_int(Rcpp::List x);
+std::vector<std::vector<int>> rcpp_to_matrix_int(Rcpp::List x);
 
 //------------------------------------------------
 // converts input from Rcpp::List format to vector<vector<double>> format.
-std::vector<std::vector<double>> rcpp_to_mat_double(Rcpp::List x);
+std::vector<std::vector<double>> rcpp_to_matrix_double(Rcpp::List x);
 
 //------------------------------------------------
 // converts input from Rcpp::List format to vector<vector<vector<int>>> format.

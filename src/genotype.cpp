@@ -1,21 +1,17 @@
 
-#include "host.h"
+#include "genotype.h"
 #include "misc.h"
 
 using namespace std;
 
 //------------------------------------------------
-// default constructor for host class
-host::host() {}
+// default constructor for genotype class
+genotype::genotype() {}
 
 //------------------------------------------------
-// constructor for host class
-host::host(int duration_) {
-  
-  // parameters
-  duration = duration_;
-  //print(duration);
-  
+// informed constructor for genotype class
+genotype::genotype(vector<vector<int>> &loci) {
+  bar();
 }
 
 //------------------------------------------------

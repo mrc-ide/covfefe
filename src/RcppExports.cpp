@@ -16,34 +16,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// simplify_line_list_cpp
-Rcpp::List simplify_line_list_cpp(Rcpp::List line_list, Rcpp::List args);
-RcppExport SEXP _covfefe_simplify_line_list_cpp(SEXP line_listSEXP, SEXP argsSEXP) {
+// sim_genotypes_cpp
+Rcpp::List sim_genotypes_cpp(Rcpp::List line_list, Rcpp::List args);
+RcppExport SEXP _covfefe_sim_genotypes_cpp(SEXP line_listSEXP, SEXP argsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::List >::type line_list(line_listSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type args(argsSEXP);
-    rcpp_result_gen = Rcpp::wrap(simplify_line_list_cpp(line_list, args));
-    return rcpp_result_gen;
-END_RCPP
-}
-// sim_genotypes_cpp
-Rcpp::List sim_genotypes_cpp(Rcpp::List args);
-RcppExport SEXP _covfefe_sim_genotypes_cpp(SEXP argsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::List >::type args(argsSEXP);
-    rcpp_result_gen = Rcpp::wrap(sim_genotypes_cpp(args));
+    rcpp_result_gen = Rcpp::wrap(sim_genotypes_cpp(line_list, args));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_covfefe_indiv_sim_cpp", (DL_FUNC) &_covfefe_indiv_sim_cpp, 1},
-    {"_covfefe_simplify_line_list_cpp", (DL_FUNC) &_covfefe_simplify_line_list_cpp, 2},
-    {"_covfefe_sim_genotypes_cpp", (DL_FUNC) &_covfefe_sim_genotypes_cpp, 1},
+    {"_covfefe_sim_genotypes_cpp", (DL_FUNC) &_covfefe_sim_genotypes_cpp, 2},
     {NULL, NULL, 0}
 };
 

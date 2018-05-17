@@ -5,11 +5,7 @@ indiv_sim_cpp <- function(args) {
     .Call('_covfefe_indiv_sim_cpp', PACKAGE = 'covfefe', args)
 }
 
-simplify_line_list_cpp <- function(line_list, args) {
-    .Call('_covfefe_simplify_line_list_cpp', PACKAGE = 'covfefe', line_list, args)
-}
-
-sim_genotypes_cpp <- function(args) {
-    .Call('_covfefe_sim_genotypes_cpp', PACKAGE = 'covfefe', args)
+sim_genotypes_cpp <- function(line_list, args) {
+    .Call('_covfefe_sim_genotypes_cpp', PACKAGE = 'covfefe', line_list, args)
 }
 

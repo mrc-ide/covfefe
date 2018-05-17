@@ -11,17 +11,22 @@
 NULL
 
 #------------------------------------------------
-#' Simplify line list
+#' Simulate genotypes
 #'
-#' Simplify line list
+#' Prune infection tree and simulate genotypes
 #'
-#' @param proj the current project
+#' @param line_list TODO
+#' @param samp_mat TODO
+#' @param demes TODO
 #'
 #' @export
 #' @examples
 #' # TODO
 
-simplify_line_list <- function(line_list, samp_mat, demes) {
+sim_genotypes <- function(line_list, samp_mat, demes) {
+  
+  loci <- list(1:10,
+               1:30)
   
   # split samp_mat into its elements
   samp_times <- unique(samp_mat[,1])
@@ -31,47 +36,14 @@ simplify_line_list <- function(line_list, samp_mat, demes) {
   args <- list(samp_times = samp_times,
                samp_demes = samp_demes,
                samp_num = samp_num,
-               demes = demes)
+               demes = demes,
+               loci = loci)
   
   t0 <- Sys.time()
   
-  output_raw <- simplify_line_list_cpp(line_list, args)
+  output_raw <- sim_genotypes_cpp(line_list, args)
   
   message(sprintf("completed in %s seconds", round(Sys.time() - t0, 2)))
-  
-  return(output_raw)
-}
-
-#------------------------------------------------
-#' Simulate genotypes
-#'
-#' Simulate genotypes
-#'
-#' @param proj the current project
-#'
-#' @export
-#' @examples
-#' # TODO
-
-sim_genotypes <- function(proj) {
-
-  # check arguments
-  assert_covfefe_project(proj)
-
-  # get useful parameters
-  demes <- length(proj$durations)
-  max_time <- length(proj$durations[[1]])
-  
-  # define argument list
-  args <- list(parameters = proj$parameters,
-               durations = proj$durations,
-               migrations = array_to_rcpp(proj$migrations),
-               demes = demes,
-               max_time = max_time
-               )
-  
-  # run efficient C++ function
-  output_raw <- sim_genotypes_cpp(args)
   
   return(output_raw)
 }

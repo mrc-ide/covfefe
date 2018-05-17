@@ -4,8 +4,8 @@
 #include <Rcpp.h>
 
 //------------------------------------------------
-// class defining host
-class host {
+// class defining genotype
+class genotype {
   
 public:
   
@@ -18,6 +18,7 @@ public:
   // PUBLIC FUNCTIONS
   
   // constructors
-  host();
-  host(int duration_);
+  genotype();
+  genotype(std::vector<std::vector<int>> &loci);
+  
 };

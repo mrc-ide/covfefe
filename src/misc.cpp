@@ -112,7 +112,7 @@ int rcpp_to_int(SEXP x) {
 }
 
 //------------------------------------------------
-// converts input from Rcpp::List format to double format.
+// converts input from Rcpp::SEXP format to double format.
 double rcpp_to_double(SEXP x) {
   return Rcpp::as<double>(x);
 }
@@ -131,7 +131,7 @@ vector<double> rcpp_to_vector_double(SEXP x) {
 
 //------------------------------------------------
 // converts input from Rcpp::List format to vector<vector<int>> format.
-vector<vector<int>> rcpp_to_mat_int(Rcpp::List x) {
+vector<vector<int>> rcpp_to_matrix_int(Rcpp::List x) {
     int nrow = int(x.size());
     vector< vector<int> > x_mat(nrow);
     for (int i=0; i<nrow; i++) {
@@ -142,7 +142,7 @@ vector<vector<int>> rcpp_to_mat_int(Rcpp::List x) {
 
 //------------------------------------------------
 // converts input from Rcpp::List format to vector<vector<double>> format.
-vector<vector<double>> rcpp_to_mat_double(Rcpp::List x) {
+vector<vector<double>> rcpp_to_matrix_double(Rcpp::List x) {
     int nrow = int(x.size());
     vector< vector<double> > x_mat(nrow);
     for (int i=0; i<nrow; i++) {

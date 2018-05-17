@@ -4,13 +4,17 @@
 \alias{sim_genotypes}
 \title{Simulate genotypes}
 \usage{
-sim_genotypes(proj)
+sim_genotypes(line_list, samp_mat, demes)
 }
 \arguments{
-\item{proj}{the current project}
+\item{line_list}{TODO}
+
+\item{samp_mat}{TODO}
+
+\item{demes}{TODO}
 }
 \description{
-Simulate genotypes
+Prune infection tree and simulate genotypes
 }
 \examples{
 # TODO
