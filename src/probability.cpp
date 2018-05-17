@@ -49,6 +49,12 @@ int rgeom1(const double p) {
 }
 
 //------------------------------------------------
+// draw from exponential(r) distribution
+double rexp1(const double r) {
+  return R::rexp(1/r);
+}
+
+//------------------------------------------------
 // sample single value from given probability vector that sums to p_sum
 int sample1(vector<double> &p, const double p_sum) {
   double rand = p_sum*runif_0_1();

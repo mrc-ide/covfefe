@@ -47,7 +47,7 @@ indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
     assert_same_length(Ih_init, H, M)
   }
   assert_same_length(Ih_init, M)
-  assert_that(all(Ih_init < H))
+  assert_that(all(Ih_init <= H))
   assert_bounded(migration_matrix)
   demes <- length(M)
   assert_that(nrow(migration_matrix) == demes, msg = sprintf("migration matrix must have %s rows and columns to match other inputs", demes))

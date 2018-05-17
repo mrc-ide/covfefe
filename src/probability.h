@@ -28,6 +28,10 @@ std::vector<int> rmultinom1(const int n, std::vector<double> &p);
 int rgeom1(const double p);
 
 //------------------------------------------------
+// draw from exponential(r) distribution
+double rexp1(const double r);
+
+//------------------------------------------------
 // sample single value from given probability vector that sums to p_sum
 int sample1(std::vector<double> &p, const double pSum=1.0);
 

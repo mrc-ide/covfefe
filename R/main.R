@@ -18,15 +18,14 @@ NULL
 #' @param line_list TODO
 #' @param samp_mat TODO
 #' @param demes TODO
+#' @param loci TODO
+#' @param recom_rate TODO
 #'
 #' @export
 #' @examples
 #' # TODO
 
-sim_genotypes <- function(line_list, samp_mat, demes) {
-  
-  loci <- list(1:10,
-               1:30)
+sim_genotypes <- function(line_list, samp_mat, demes, loci, recom_rate) {
   
   # split samp_mat into its elements
   samp_times <- unique(samp_mat[,1])
@@ -37,7 +36,8 @@ sim_genotypes <- function(line_list, samp_mat, demes) {
                samp_demes = samp_demes,
                samp_num = samp_num,
                demes = demes,
-               loci = loci)
+               loci = loci,
+               recom_rate = recom_rate)
   
   t0 <- Sys.time()
   

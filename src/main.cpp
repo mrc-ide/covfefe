@@ -139,29 +139,13 @@ vector<vector<map<int, int>>> draw_hosts(Rcpp::List &line_list, Rcpp::List &args
 }
 
 //------------------------------------------------
-// prune infection tree and simulate genotypes
-// [[Rcpp::export]]
-Rcpp::List sim_genotypes_cpp(Rcpp::List line_list, Rcpp::List args) {
+// prune infection tree
+void prune(vector<int> &pruned_de_novo, vector<vector<pair<int, int>>> &pruned_infection, vector<vector<int>> &pruned_delete, Rcpp::List &line_list, vector<int> &samp_times, vector<vector<map<int, int>>> &samp_hosts, int demes) {
   
   // extract arguments
-  vector<int> samp_times = rcpp_to_vector_int(args["samp_times"]);
-  int demes = rcpp_to_int(args["demes"]);
   int n_samp = samp_times.size();
   int max_samp_time = samp_times[n_samp-1];
   
-  // draw hosts from given sampling times
-  vector<vector<map<int, int>>> samp_hosts = draw_hosts(line_list, args);
-  /*
-  for (int i=0; i<n_samp; i++) {
-    int this_time = samp_times[i]-1;
-    Rcpp::Rcout << this_time << ":   ";
-    for (auto it = samp_hosts[0][i].begin(); it!=samp_hosts[0][i].end(); ++it) {
-      int host_ID = it->first;
-      Rcpp::Rcout << host_ID << " ";
-    }
-    Rcpp::Rcout << "\n";
-  }
-  */
   // create a schedule of hosts that become relevant at each time point. 
   // Relevant hosts are those that are in the history of the sampled hosts, i.e.
   // hosts for which we will ultimately need to simulate genotypes. Start by
@@ -180,14 +164,11 @@ Rcpp::List sim_genotypes_cpp(Rcpp::List line_list, Rcpp::List args) {
   // running list of relevant hosts
   map<int, int> hosts;
   
-  // save events that make up pruned tree
-  vector<int> de_novo;
-  vector<vector<pair<int, int>>> list_infection(max_samp_time);
+  // store the latest occurring entry for each relevant host
   map<int, int> latest_entry;
   
   
-  // SIMULATION 1 ############################################################
-  // prune infection tree
+  // SIMULATION ############################################################
   
   // loop backwards through line list
   vector<int> this_line;
@@ -195,7 +176,7 @@ Rcpp::List sim_genotypes_cpp(Rcpp::List line_list, Rcpp::List args) {
   while (i>0) {
     int t = i/4-1;
     
-    //#### ADD SCHEDULED HOSTS
+    //#### ADD SCHEDULED HOSTS TO RUNNING LIST
     for (auto it = schedule_hosts[t].begin(); it!=schedule_hosts[t].end(); ++it) {
       int host_ID = it->first;
       hosts[host_ID] = schedule_hosts[t][host_ID];
@@ -211,9 +192,9 @@ Rcpp::List sim_genotypes_cpp(Rcpp::List line_list, Rcpp::List args) {
       if (hosts.count(host_ID)>0) {
         int source_ID = this_line[6*j+3];
         
-        // if this is a de-novo infection then add to de_novo list and skip over
+        // if this is a de-novo infection then add to pruned_de_novo list and skip over
         if (source_ID==-1) {
-          de_novo.push_back(host_ID);
+          pruned_de_novo.push_back(host_ID);
           hosts.erase(host_ID);
           continue;
         }
@@ -224,7 +205,7 @@ Rcpp::List sim_genotypes_cpp(Rcpp::List line_list, Rcpp::List args) {
         schedule_hosts[source_time][source_ID] = source_n;
         
         // add to list of infections
-        list_infection[source_time].push_back({source_ID, host_ID});
+        pruned_infection[source_time].push_back({source_ID, host_ID});
         
         // update latest entry for this source as needed
         if (latest_entry.count(source_ID)==0) {
@@ -241,17 +222,15 @@ Rcpp::List sim_genotypes_cpp(Rcpp::List line_list, Rcpp::List args) {
       }
     }
     i--;
-    
     /*
-    Rcpp::Rcout << t+1 << ":  ";
+    Rcpp::Rcout << t << ":  ";
     for (auto it = hosts.begin(); it!=hosts.end(); ++it) {
       int host_ID = it->first;
-      int inf_n = hosts[host_ID];
       Rcpp::Rcout << host_ID << " ";
     }
     Rcpp::Rcout << "\n";
     */
-  }
+  } // end loop through line list
   
   // remove samp_hosts from latest entries
   for (int k=0; k<demes; k++) {
@@ -264,50 +243,79 @@ Rcpp::List sim_genotypes_cpp(Rcpp::List line_list, Rcpp::List args) {
   }
   
   // fill in deletion list
-  vector<vector<int>> list_delete(max_samp_time);
   for (auto it = latest_entry.begin(); it!=latest_entry.end(); ++it) {
     int host_ID = it->first;
     int delete_time = it->second;
-    list_delete[delete_time].push_back(host_ID);
+    pruned_delete[delete_time].push_back(host_ID);
   }
-  /*
-  for (int i=0; i<max_samp_time; i++) {
-    Rcpp::Rcout << i+1 << ":  ";
-    for (auto it = list_infection[i].begin(); it!=list_infection[i].end(); ++it) {
-      int host_ID = it->first;
-      int targ_ID = it->second;
-      Rcpp::Rcout << host_ID << "-" << targ_ID << " ";
-    }
-    Rcpp::Rcout << "  |  ";
-    for (int j=0; j<int(list_delete[i].size()); j++) {
-      Rcpp::Rcout << list_delete[i][j] << " ";
-    }
-    Rcpp::Rcout << "\n";
-  }
-  */
   
-  
-  // SIMULATION 2 ############################################################
-  // simulate genetic data
-  
-  //vector<int> de_novo;
-  //vector<vector<pair<int, int>>> list_infection(max_samp_time);
-  //vector<vector<int>> list_delete(max_samp_time);
+}
+
+//------------------------------------------------
+// simulate genotypes
+// [[Rcpp::export]]
+Rcpp::List sim_genotypes_cpp(Rcpp::List line_list, Rcpp::List args) {
   
   // extract arguments
+  vector<int> samp_times = rcpp_to_vector_int(args["samp_times"]);
+  int demes = rcpp_to_int(args["demes"]);
+  int n_samp = samp_times.size();
+  int max_samp_time = samp_times[n_samp-1];
   vector<vector<int>> loci = rcpp_to_matrix_int(args["loci"]);
   int n_chrom = loci.size();
+  double recom_rate = rcpp_to_double(args["recom_rate"]);
   
+  // draw hosts from given sampling times
+  vector<vector<map<int, int>>> samp_hosts = draw_hosts(line_list, args);
+  
+  // objects that make up output of pruning infection tree
+  vector<int> pruned_de_novo;
+  vector<vector<pair<int, int>>> pruned_infection(max_samp_time);
+  vector<vector<int>> pruned_delete(max_samp_time);
+  
+  // prune infection tree
+  prune(pruned_de_novo, pruned_infection, pruned_delete, line_list, samp_times, samp_hosts, demes);
+  
+  
+  // SIMULATION  ############################################################
+  
+  // map for storing genotypes
   map<int, genotype> gen_map;
   
   // initialise de-novo infections
-  for (int i=0; i<int(de_novo.size()); i++) {
-    int host_ID = de_novo[i];
-    gen_map[host_ID] = genotype();
-    
+  for (int i=0; i<int(pruned_de_novo.size()); i++) {
+    int host_ID = pruned_de_novo[i];
+    gen_map[host_ID].de_novo(loci,i);
   }
   
+  //print_stars("", 80);
+  
+  // loop through time
+  for (int t=0; t<max_samp_time; t++) {
+    
+    // infection
+    for (int i=0; i<int(pruned_infection[t].size()); i++) {
+      int host_ID = pruned_infection[t][i].first;
+      int targ_ID = pruned_infection[t][i].second;
+      genotype_infect(gen_map[host_ID], gen_map[targ_ID], loci, recom_rate);
+    }
+    
+    // delete redundant
+    for (int i=0; i<int(pruned_delete[t].size()); i++) {
+      int host_ID = pruned_delete[t][i];
+      gen_map.erase(host_ID);
+    }
+    
+  } // end loop through time
+  
+  for (auto it = gen_map.begin(); it!=gen_map.end(); ++it) {
+    int host_ID = it->first;
+    print("host_ID =", host_ID);
+    print_array(gen_map[host_ID].x);
+  }
   
   Rcpp::List ret = Rcpp::List::create(Rcpp::Named("foo") = samp_times);
   return ret;
 }
+
+
