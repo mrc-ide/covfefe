@@ -321,14 +321,16 @@ Rcpp::List indiv_sim_cpp(Rcpp::List args) {
         
         if ((t+dur)<max_time) { // both infective and recovery occur within max_time
           schedule_infective[t+g].push_back({host_ID, inf_ID});
-          schedule_recover[t+dur].push_back({host_ID, inf_ID, 1});
+          tuple<int, int, int> tmp(host_ID, inf_ID, 1);
+          schedule_recover[t+dur].push_back(tmp);
         } else if ((t+g)<max_time) {  // infective but not recovery occur within max_time
           schedule_infective[t+g].push_back({host_ID, inf_ID});
         }
         
       } else {  // if recover prior to become infective
         if ((t+dur)<max_time) { // recovery occurs within max_time
-          schedule_recover[t+dur].push_back({host_ID, inf_ID, 0});
+          tuple<int, int, int> tmp(host_ID, inf_ID, 0);
+          schedule_recover[t+dur].push_back(tmp);
         }
       }
     }
