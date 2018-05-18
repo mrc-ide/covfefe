@@ -1,8 +1,8 @@
 
-# -----------------------------------
-#' @title indiv_sim
+#------------------------------------------------
+#' @title Simulate from simple individual-based model
 #'
-#' @description Draws from individual-based model
+#' @description Simulate from simple individual-based model
 #' 
 #' @details TODO
 #'
@@ -17,15 +17,17 @@
 #' @param b probability a human becomes infected after being bitten by an infected mosquito.
 #' @param c probability a mosquito becomes infected after biting an infected human.
 #' @param Ih_init initial number of infectious humans in each deme.
-#' @param Iv_init initial number of infectious mosquitoes in each deme.
 #' @param H human population size in each deme.
 #' @param M mosquito population size (number of adult female mosquitoes) in each deme.
+#' @param max_infections maximum number of infections that an individual can hold simultaneously.
 #' @param migration_matrix matrix giving the probability of migrating from current deme (rows) to new deme (columns).
-#' @param H_auto if TRUE then human population sizes are chosen automatically based on the migration matrix. The total number of humans is equal to sum(H).
+#' @param H_auto if TRUE then human population sizes are chosen automatically based on the migration matrix. In this case the total number of humans is equal to sum(H).
 #'
 #' @export
+#' @examples
+#' # TODO
 
-indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v = 10, g = 10, r = 1/200, b = 1, c = 1, Ih_init = 10, H = 100, M = 100, max_infections = 5, migration_matrix = matrix(1), H_auto = FALSE) {
+sim_indiv <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v = 10, g = 10, r = 1/200, b = 1, c = 1, Ih_init = 10, H = 100, M = 100, max_infections = 5, migration_matrix = matrix(1), H_auto = FALSE) {
   
   # check arguments
   assert_pos_int(max_time, zero_allowed = FALSE)
@@ -58,7 +60,7 @@ indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
   diag(migration_matrix) <- 1 - rowSums(migration_matrix)
   any_migration <- sum(diag(migration_matrix)) < demes
   
-  # calculate expected human population sizes
+  # if any migration then calculate expected human population sizes
   if (any_migration) {
     
     # calculate expected human population sizes from equilibrium solution to
@@ -74,7 +76,7 @@ indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
       H_prev <- H_expected
       H_expected <- round(as.vector(crossprod(H_expected, migration_matrix)))
     }
-  } else {
+  } else {  # if no migration
     
     # share human hosts equally between demes
     H_expected <- round(rep(sum(H)/demes, demes))
@@ -94,13 +96,12 @@ indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
   # calculate number of individuals that move each generation
   delta_mig <- round(outer(H, rep(1,demes)) * migration_matrix * (1-diag(1,demes)))
   
+  # it is still possible that delta_mig does not represent stable migration due 
+  # to rounding errors Calculate discrepancies and alter matrix until completely
+  # stable
   if (any_migration) {
-    # it is still possible that delta_mig does not represent stable migration due
-    # to rounding errors Calculate discrepancies and alter matrix until 
-    # completely stable
     discrep <- rowSums(delta_mig) - colSums(delta_mig)
     for (k in 1:(demes-1)) {
-      # adjust delta_mig to reduce discrepancies
       discrep_diff <- abs(discrep[k] + discrep[(k+1):demes])
       best_diff <- k + which.min(discrep_diff)
       delta_mig[k,best_diff] <- delta_mig[k,best_diff] - discrep[k]
@@ -124,23 +125,62 @@ indiv_sim <- function(max_time = 100, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
                max_infections = max_infections,
                delta_mig = mat_to_rcpp(delta_mig),
                demes = demes
-               )
+  )
   
+  # start timer
   t0 <- Sys.time()
   
   # run efficient C++ function
   output_raw <- indiv_sim_cpp(args)
   
   # process output
-  n_bloodstage <- list()
+  daily_counts <- list()
   for (k in 1:demes) {
-    n_bloodstage[[k]] <- rcpp_to_mat(output_raw$n_bloodstage[[k]])
+    daily_counts[[k]] <- cbind(1:max_time, rcpp_to_mat(output_raw$daily_counts[[k]]))
+    colnames(daily_counts[[k]]) <- c("time", "Sh", paste0("Ih", 1:max_infections))
   }
+  names(daily_counts) <- paste0("deme", 1:demes)
   
+  # create custom class
+  ret <- list(H = H,
+              daily_counts = daily_counts,
+              infection_history = output_raw$infection_history)
+  class(ret) <- "covfefe_indiv"
+  
+  # end timer
   message(sprintf("completed in %s seconds", round(Sys.time() - t0, 2)))
   
-  # return as list
-  ret <- list(n_bloodstage = n_bloodstage,
-              line_list = output_raw$line_list)
-  return(ret)
+  # return invisibly
+  invisible(ret)
+}
+
+#------------------------------------------------
+# overload print() function for covfefe_indiv
+# (not exported)
+
+print.covfefe_indiv <- function(x, ...) {
+
+  # print without class name
+  print(unclass(x))
+  
+  # return invisibly
+  invisible(x)
+}
+
+#------------------------------------------------
+# overload summary() function for covfefe_indiv
+# (not exported)
+
+summary.covfefe_indiv <- function(x, ...) {
+
+  print("TODO")
+
+}
+
+#------------------------------------------------
+# determine if object is of class covfefe_indiv
+# (not exported)
+
+is.covfefe_indiv <- function(x) {
+  inherits(x, "covfefe_indiv")
 }

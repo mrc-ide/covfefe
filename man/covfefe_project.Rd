@@ -5,22 +5,24 @@
 \title{Create covfefe project}
 \usage{
 covfefe_project(recom_rate = 0.01, bloodstage_skew = 1,
-  biting = dpois(0:9, lambda = 1), oocysts = dpois(0:9, lambda = 1),
-  hepatocytes = dpois(0:9, lambda = 1))
+  oocysts = dpois(0:9, lambda = 1), hepatocytes = dpois(0:9, lambda = 1))
 }
 \arguments{
 \item{recom_rate}{TODO}
 
 \item{bloodstage_skew}{TODO}
 
-\item{biting}{TODO}
-
 \item{oocysts}{TODO}
 
 \item{hepatocytes}{TODO}
+
+\item{biting}{TODO}
 }
 \description{
 Create covfefe project
+}
+\details{
+TODO
 }
 \examples{
 # TODO

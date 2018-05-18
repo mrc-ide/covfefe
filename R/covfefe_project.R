@@ -1,9 +1,11 @@
 
 #------------------------------------------------
-#' Create covfefe project
+#' @title Create covfefe project
 #'
-#' Create covfefe project
+#' @description Create covfefe project
 #'
+#' @details TODO
+#' 
 #' @param recom_rate TODO
 #' @param bloodstage_skew TODO
 #' @param biting TODO
@@ -14,31 +16,31 @@
 #' @examples
 #' # TODO
 
-covfefe_project <- function(recom_rate = 1e-2, bloodstage_skew = 1, biting = dpois(0:9, lambda = 1), oocysts = dpois(0:9, lambda = 1), hepatocytes = dpois(0:9, lambda = 1)) {
+covfefe_project <- function(recom_rate = 1e-2, bloodstage_skew = 1, oocysts = dpois(0:9, lambda = 1), hepatocytes = dpois(0:9, lambda = 1)) {
 
   # create parameters list
   parameters <- list(recom_rate = recom_rate,
                      bloodstage_skew = bloodstage_skew)
 
   # create distributions list
-  distributions <- list(biting = biting,
-                        oocysts = oocysts,
+  distributions <- list(oocysts = oocysts,
                         hepatocytes = hepatocytes)
 
   # create new project
   ret <- list(parameters = parameters,
               distributions = distributions,
-              lags = NULL,
-              durations = NULL,
-              migrations = NULL,
-              n_infecteds = NULL,
+              infection_history = NULL,
+              pop_counts = NULL,
+              samp_mat = NULL,
+              samp_hosts = NULL,
+              pruned_tree = NULL,
               genotypes = NULL)
 
   # create class
   class(ret) <- "covfefe_project"
 
-  # return
-  return(ret)
+  # return invisibly
+  invisible(ret)
 }
 
 #------------------------------------------------
@@ -47,9 +49,10 @@ covfefe_project <- function(recom_rate = 1e-2, bloodstage_skew = 1, biting = dpo
 
 print.covfefe_project <- function(x, ...) {
 
-  # print selected elements
-  print(unclass(x)[c("parameters", "distributions", "durations", "migrations", "n_infecteds", "genotypes")])
-
+  # print without class name
+  print(unclass(x))
+  
+  # return invisibly
   invisible(x)
 }
 

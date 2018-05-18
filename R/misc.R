@@ -1,9 +1,11 @@
 
 #------------------------------------------------
-#' Import file
+#' @title Import file
 #'
-#' Import file from the inst/extdata folder of this package
+#' @description Import file from the inst/extdata folder of this package
 #'
+#' @details TODO
+#' 
 #' @param name name of file
 #'
 #' @export

@@ -104,7 +104,7 @@ void genotype_infect(genotype &source, genotype &dest, vector<vector<int>> &loci
 //------------------------------------------------
 // recombine two genotypes
 vector<vector<int>> recombine(vector<vector<int>> &gen1, vector<vector<int>> &gen2, vector<vector<int>> &loci, double recom_rate) {
-  foo();
+  
   // initialise return object
   int nc = gen1.size();
   vector<vector<int>> ret(nc);

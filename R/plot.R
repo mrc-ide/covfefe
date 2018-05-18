@@ -1,9 +1,11 @@
 
 #------------------------------------------------
-#' Plot total infecteds
+#' @title Plot total infecteds
 #'
-#' Plot total infecteds
+#' @description Plot total infecteds
 #'
+#' @details TODO
+#' 
 #' @param proj project
 #'
 #' @export

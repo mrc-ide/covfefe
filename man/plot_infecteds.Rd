@@ -12,6 +12,9 @@ plot_infecteds(proj)
 \description{
 Plot total infecteds
 }
+\details{
+TODO
+}
 \examples{
 # TODO
 }

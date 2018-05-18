@@ -4,7 +4,7 @@
 \alias{sim_genotypes}
 \title{Simulate genotypes}
 \usage{
-sim_genotypes(line_list, samp_mat, demes)
+sim_genotypes(line_list, samp_mat, demes, loci, recom_rate)
 }
 \arguments{
 \item{line_list}{TODO}
@@ -12,9 +12,16 @@ sim_genotypes(line_list, samp_mat, demes)
 \item{samp_mat}{TODO}
 
 \item{demes}{TODO}
+
+\item{loci}{TODO}
+
+\item{recom_rate}{TODO}
 }
 \description{
 Prune infection tree and simulate genotypes
+}
+\details{
+TODO
 }
 \examples{
 # TODO
