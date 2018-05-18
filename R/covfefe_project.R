@@ -8,7 +8,6 @@
 #' 
 #' @param recom_rate TODO
 #' @param bloodstage_skew TODO
-#' @param biting TODO
 #' @param oocysts TODO
 #' @param hepatocytes TODO
 #'

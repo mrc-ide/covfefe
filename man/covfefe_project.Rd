@@ -15,8 +15,6 @@ covfefe_project(recom_rate = 0.01, bloodstage_skew = 1,
 \item{oocysts}{TODO}
 
 \item{hepatocytes}{TODO}
-
-\item{biting}{TODO}
 }
 \description{
 Create covfefe project

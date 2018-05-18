@@ -2,23 +2,19 @@
 % Please edit documentation in R/main.R
 \name{sim_genotypes}
 \alias{sim_genotypes}
-\title{Simulate genotypes}
+\title{Simulate genotypes from pruned infection tree}
 \usage{
-sim_genotypes(line_list, samp_mat, demes, loci, recom_rate)
+sim_genotypes(proj, loci, recom_rate)
 }
 \arguments{
-\item{line_list}{TODO}
-
-\item{samp_mat}{TODO}
-
-\item{demes}{TODO}
+\item{proj}{current covfefe project}
 
 \item{loci}{TODO}
 
 \item{recom_rate}{TODO}
 }
 \description{
-Prune infection tree and simulate genotypes
+Simulate genotypes from pruned infection tree
 }
 \details{
 TODO

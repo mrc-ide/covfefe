@@ -61,6 +61,9 @@ sample_hosts <- function(proj, samp_mat, demes, recover_pop_counts = FALSE, max_
   assert_that(!is.null(proj$infection_history))
   # check times increasing
   
+  # get useful values
+  max_time <- length(proj$infection_history)
+  
   # add samp_mat to project
   proj$samp_mat <- samp_mat
   
