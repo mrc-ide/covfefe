@@ -247,7 +247,8 @@ Rcpp::List indiv_sim_cpp(Rcpp::List args) {
           int rnd1 = sample2(0,host_infective[k].size()-1);
           int this_host = host_infective[k][rnd1];
           int this_n = host[this_host].n_bloodstage + host[this_host].n_infective;
-          Ev[k][v_ringbuffer_thistime].push_back({this_host, this_n, t});
+          tuple<int, int, int> tmp(this_host, this_n, t);
+          Ev[k][v_ringbuffer_thistime].push_back(tmp);
         }
       }
       
