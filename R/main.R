@@ -213,6 +213,8 @@ sim_genotypes <- function(proj, loci, recom_rate) {
   # define argument list
   args <- list(samp_times = samp_times,
                pruned = proj$pruned_tree,
+               dist_oocysts = proj$distributions$oocysts,
+               dist_hepatocytes = proj$distributions$hepatocytes,
                loci = loci,
                recom_rate = recom_rate)
   

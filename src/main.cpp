@@ -322,6 +322,8 @@ Rcpp::List sim_genotypes_cpp(Rcpp::List &samp_hosts_raw, Rcpp::List &args) {
   // extract arguments
   vector<int> samp_times = rcpp_to_vector_int(args["samp_times"]);
   vector<vector<vector<int>>> pruned = rcpp_to_array_int(args["pruned"]);
+  vector<double> dist_oocysts = rcpp_to_vector_double(args["dist_oocysts"]);
+  vector<double> dist_hepatocytes = rcpp_to_vector_double(args["dist_hepatocytes"]);
   vector<vector<int>> loci = rcpp_to_matrix_int(args["loci"]);
   double recom_rate = rcpp_to_double(args["recom_rate"]);
   int n_samp = samp_times.size();
@@ -364,7 +366,7 @@ Rcpp::List sim_genotypes_cpp(Rcpp::List &samp_hosts_raw, Rcpp::List &args) {
     for (int i=0; i<int(pruned[t][1].size())/2; i++) {
       int host_ID = pruned[t][1][2*i];
       int targ_ID = pruned[t][1][2*i+1];
-      genotype_infect(gen_map[host_ID], gen_map[targ_ID], loci, recom_rate);
+      genotype_infect(gen_map[host_ID], gen_map[targ_ID], dist_oocysts, dist_hepatocytes, loci, recom_rate);
     }
     
     //#### DELETE REDUNDANT

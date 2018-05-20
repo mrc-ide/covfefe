@@ -28,7 +28,7 @@ void genotype::de_novo(vector<vector<int>> &loci, int z) {
 
 //------------------------------------------------
 // pass infection from source host to dest host via a mosquito
-void genotype_infect(genotype &source, genotype &dest, vector<vector<int>> &loci, double recom_rate) {
+void genotype_infect(genotype &source, genotype &dest, vector<double> &dist_oocysts, vector<double> &dist_hepatocytes, vector<vector<int>> &loci, double recom_rate) {
   
   // if single infection then pass on this infection unchanged
   if (source.n_x==1) {
@@ -38,7 +38,7 @@ void genotype_infect(genotype &source, genotype &dest, vector<vector<int>> &loci
   }
   
   // draw number of oocysts in mosquito
-  int n_oocysts = 1;  // TODO - make random
+  int n_oocysts = sample1(dist_oocysts);
   
   // draw of a pair of source genotypes for each oocyst
   vector<pair<int, int>> gametocytes(n_oocysts);
@@ -48,7 +48,7 @@ void genotype_infect(genotype &source, genotype &dest, vector<vector<int>> &loci
   }
   
   // draw number of infected hepatocytes
-  int n_hepatocytes = 10;  // TODO - make random
+  int n_hepatocytes = sample1(dist_hepatocytes);
   
   // for each hepatocyte, draw an oocyst at random (call this draw r1). Let the
   // two gametocytes that make up this oocyst be g1 and g2. If g1==g2 then there

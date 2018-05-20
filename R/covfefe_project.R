@@ -6,8 +6,6 @@
 #'
 #' @details TODO
 #' 
-#' @param recom_rate TODO
-#' @param bloodstage_skew TODO
 #' @param oocysts TODO
 #' @param hepatocytes TODO
 #'
@@ -15,15 +13,14 @@
 #' @examples
 #' # TODO
 
-covfefe_project <- function(recom_rate = 1e-2, bloodstage_skew = 1, oocysts = dpois(0:9, lambda = 1), hepatocytes = dpois(0:9, lambda = 1)) {
+covfefe_project <- function(oocysts = dpois(0:9, lambda = 1), hepatocytes = dpois(0:9, lambda = 1)) {
 
   # create parameters list
-  parameters <- list(recom_rate = recom_rate,
-                     bloodstage_skew = bloodstage_skew)
+  parameters <- list(foo = -9)
 
   # create distributions list
-  distributions <- list(oocysts = oocysts,
-                        hepatocytes = hepatocytes)
+  distributions <- list(oocysts = oocysts/sum(oocysts),
+                        hepatocytes = hepatocytes/sum(hepatocytes))
 
   # create new project
   ret <- list(parameters = parameters,
