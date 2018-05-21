@@ -5,13 +5,15 @@
 [![Coverage Status](https://img.shields.io/codecov/c/github/mrc-ide/covfefe/master.svg)](https://codecov.io/github/mrc-ide/covfefe?branch=master)
 [![Documentation](https://img.shields.io/badge/documentation-click%20here!-blue.svg)](https://mrc-ide.github.io/covfefe/)
 
-The R package *covfefe* performs Computational Validation For Estimating Falciparum Epidemiology (ahem). More specifically, it provides a flexible framework for simulating genetic data from *P. falciparum* transmission models.
-
-We start with data on infection histories - i.e. who became infected when, who did this infection originate from, when did this episode recover, etc. We then specify a subset of samples that we are interested in - for example, 100 individuals at day 365. *covfefe* then prunes the infection history data down to a reduced set that contains only the events that directly impact on the samples that we are interested in. Often the number of sampled hosts is far smaller than the total infected population, or perhaps sampling only occurs at a few time points, meaning the pruned infection history can be *much* smaller than the complete infection history. Finally, *covfefe* simulates genetic data from the pruned infection history and from a set of user-defined parameters that specify the genetic model, for example the recombination rate and the number of loci.
+==============================================================
 
 <p align="center">
 <img src="man/figures/covfefe_flow.png" width="700" align="middle">
 </p>
+
+The R package *covfefe* performs Computational Validation For Estimating Falciparum Epidemiology (ahem). More specifically, it provides a flexible framework for simulating genetic data from *P. falciparum* transmission models.
+
+We start with data on infection histories - i.e. who became infected when, who did this infection originate from, when did this episode recover, etc. We then specify a subset of samples that we are interested in - for example, 100 individuals at day 365. *covfefe* then prunes the infection history data down to a reduced set that contains only the events that directly impact on the samples that we are interested in. Often the number of sampled hosts is far smaller than the total infected population, or perhaps sampling only occurs at a few time points, meaning the pruned infection history can be *much* smaller than the complete infection history. Finally, *covfefe* simulates genetic data from the pruned infection history and from a set of user-defined parameters that specify the genetic model, for example the recombination rate and the number of loci.
 
 By using the infection history as the starting point we ensure that multiple epidemiological models can be plugged into the same tool. Any malaria transmission model that generates infection history data in the format required by *covfefe* can be used to simulate genetic data, and this format has been designed to be flexible enough to encompass a wide range of models. *covfefe* also contains it sown simple individual-based model that simulates malaria transmission in multiple demes (partially isolated subpopulations), with or without migration between demes.
 
