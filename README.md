@@ -5,7 +5,7 @@
 [![Coverage Status](https://img.shields.io/codecov/c/github/mrc-ide/covfefe/master.svg)](https://codecov.io/github/mrc-ide/covfefe?branch=master)
 [![Documentation](https://img.shields.io/badge/documentation-click%20here!-blue.svg)](https://mrc-ide.github.io/covfefe/)
 
-==============================================================
+--------------------------------------------------------------------------------------------------------------------------------
 
 <p align="center">
 <img src="man/figures/covfefe_flow.png" width="700" align="middle">
