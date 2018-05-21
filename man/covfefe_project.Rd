@@ -4,14 +4,10 @@
 \alias{covfefe_project}
 \title{Create covfefe project}
 \usage{
-covfefe_project(recom_rate = 0.01, bloodstage_skew = 1,
-  oocysts = dpois(0:9, lambda = 1), hepatocytes = dpois(0:9, lambda = 1))
+covfefe_project(oocysts = dpois(0:9, lambda = 1), hepatocytes = dpois(0:9,
+  lambda = 1))
 }
 \arguments{
-\item{recom_rate}{TODO}
-
-\item{bloodstage_skew}{TODO}
-
 \item{oocysts}{TODO}
 
 \item{hepatocytes}{TODO}
