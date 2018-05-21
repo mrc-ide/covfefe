@@ -186,7 +186,6 @@ Rcpp::List prune_cpp(Rcpp::List &infection_history, Rcpp::List &samp_hosts_raw, 
   
   // extract arguments
   vector<int> samp_times = rcpp_to_vector_int(args["samp_times"]);
-  int max_time = infection_history.size();
   int demes = samp_hosts_raw.size();
   int n_samp = samp_times.size();
   int max_samp_time = samp_times[n_samp-1];
@@ -325,6 +324,7 @@ Rcpp::List sim_genotypes_cpp(Rcpp::List &samp_hosts_raw, Rcpp::List &args) {
   vector<double> dist_oocysts = rcpp_to_vector_double(args["dist_oocysts"]);
   vector<double> dist_hepatocytes = rcpp_to_vector_double(args["dist_hepatocytes"]);
   vector<vector<int>> loci = rcpp_to_matrix_int(args["loci"]);
+  vector<bool> loci_null = rcpp_to_vector_bool(args["loci_null"]);
   double recom_rate = rcpp_to_double(args["recom_rate"]);
   int n_samp = samp_times.size();
   int max_samp_time = pruned.size();
@@ -343,6 +343,13 @@ Rcpp::List sim_genotypes_cpp(Rcpp::List &samp_hosts_raw, Rcpp::List &args) {
       for (int j=0; j<n; j++) {
         samp_hosts[k][i][j] = v[j];
       }
+    }
+  }
+  
+  // drop null chromosomes
+  for (int i=0; i<int(loci_null.size()); i++) {
+    if (loci_null[i] == true) {
+      loci[i].clear();
     }
   }
   

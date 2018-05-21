@@ -5,31 +5,24 @@
 #' @description Create covfefe project
 #'
 #' @details TODO
-#' 
-#' @param oocysts TODO
-#' @param hepatocytes TODO
 #'
 #' @export
 #' @examples
 #' # TODO
 
-covfefe_project <- function(oocysts = dpois(0:9, lambda = 1), hepatocytes = dpois(0:9, lambda = 1)) {
+covfefe_project <- function() {
 
-  # create parameters list
+  # TODO - do we need parameters?
   parameters <- list(foo = -9)
-
-  # create distributions list
-  distributions <- list(oocysts = oocysts/sum(oocysts),
-                        hepatocytes = hepatocytes/sum(hepatocytes))
 
   # create new project
   ret <- list(parameters = parameters,
-              distributions = distributions,
               infection_history = NULL,
               pop_counts = NULL,
               samp_mat = NULL,
               samp_hosts = NULL,
               pruned_tree = NULL,
+              distributions = NULL,
               genotypes = NULL)
 
   # create class

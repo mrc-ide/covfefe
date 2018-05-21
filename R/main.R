@@ -189,6 +189,60 @@ delete_infection_history <- function(proj) {
 }
 
 #------------------------------------------------
+#' @title Define oocyst count distribution
+#'
+#' @description Define oocyst count distribution
+#'
+#' @details TODO
+#' 
+#' @param proj current covfefe project
+#' @param oocysts TODO
+#'
+#' @export
+#' @examples
+#' # TODO
+
+define_oocyst_distribution <- function(proj, oocysts) {
+  
+  # TODO - check inputs
+  
+  # add to project
+  proj$distributions$oocysts <- oocysts/sum(oocysts)
+  
+  # TODO - option to plot?
+  
+  # return invisibly
+  invisible(proj)
+}
+
+#------------------------------------------------
+#' @title Define hepatocyte count distribution
+#'
+#' @description Define hepatocyte count distribution
+#'
+#' @details TODO
+#' 
+#' @param proj current covfefe project
+#' @param hepatocytes TODO
+#'
+#' @export
+#' @examples
+#' # TODO
+
+define_hepatocyte_distribution <- function(proj, hepatocytes) {
+  
+  # TODO - check inputs
+  
+  # add to project
+  proj$distributions$hepatocytes <- hepatocytes/sum(hepatocytes)
+  
+  # TODO - option to plot?
+  
+  # return invisibly
+  invisible(proj)
+}
+
+#------------------------------------------------
 #' @title Simulate genotypes from pruned infection tree
 #'
 #' @description Simulate genotypes from pruned infection tree
@@ -210,16 +264,28 @@ sim_genotypes <- function(proj, loci, recom_rate) {
   # extract sample times
   samp_times <- unique(proj$samp_mat[,1])
   
+  # find null chromosomes
+  loci_null <- rep(FALSE, length(loci))
+  for (i in 1:length(loci)) {
+    if (is.null(loci[[i]])) {
+      loci_null[i] <- TRUE
+      loci[[i]] <- -9
+    }
+  }
+  
   # define argument list
   args <- list(samp_times = samp_times,
                pruned = proj$pruned_tree,
                dist_oocysts = proj$distributions$oocysts,
                dist_hepatocytes = proj$distributions$hepatocytes,
                loci = loci,
+               loci_null = loci_null,
                recom_rate = recom_rate)
   
   # start timer
   t0 <- Sys.time()
+  
+  print(args)
   
   # run efficient C++ function
   output_raw <- sim_genotypes_cpp(proj$samp_hosts, args)

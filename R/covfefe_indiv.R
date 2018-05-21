@@ -27,7 +27,7 @@
 #' @examples
 #' # TODO
 
-sim_indiv <- function(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 22, v = 10, g = 10, r = 1/20, b = 1, c = 1, Ih_init = 10, H = 1000, M = 500, max_infections = 5, migration_matrix = matrix(1), H_auto = FALSE) {
+sim_indiv <- function(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 22, v = 10, g = 10, r = 1/20, b = 1, c = 1, Ih_init = 10, H = 1000, M = 1000, max_infections = 5, migration_matrix = matrix(1), H_auto = FALSE) {
   
   # check arguments
   assert_pos_int(max_time, zero_allowed = FALSE)

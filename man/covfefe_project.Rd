@@ -4,13 +4,7 @@
 \alias{covfefe_project}
 \title{Create covfefe project}
 \usage{
-covfefe_project(oocysts = dpois(0:9, lambda = 1), hepatocytes = dpois(0:9,
-  lambda = 1))
-}
-\arguments{
-\item{oocysts}{TODO}
-
-\item{hepatocytes}{TODO}
+covfefe_project()
 }
 \description{
 Create covfefe project
