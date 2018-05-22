@@ -48,8 +48,10 @@ test_that("assert_bounded works", {
   expect_true(assert_bounded(seq(0, 1, 0.1)))
   expect_true(assert_bounded(seq(-5, 5, 0.1), left = -5, right = 5))
   
-  expect_error(assert_bounded(-5, left = -5, inclusive_left = FALSE))
-  expect_error(assert_bounded(5, right = 5, inclusive_right = FALSE))
+  expect_error(assert_bounded(-1, left = 0))
+  expect_error(assert_bounded(2, right = 0))
+  expect_error(assert_bounded(0, left = 0, inclusive_left = FALSE))
+  expect_error(assert_bounded(1, right = 1, inclusive_right = FALSE))
   expect_error(assert_bounded("foo"))
 })
 
@@ -101,4 +103,6 @@ test_that("assert_symmetric_matrix works", {
 test_that("assert_covfefe_project works", {
   p <- covfefe_project()
   expect_true(assert_covfefe_project(p))
+  
+  expect_error(assert_covfefe_project(1))
 })

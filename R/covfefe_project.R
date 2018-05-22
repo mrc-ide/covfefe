@@ -53,6 +53,8 @@ summary.covfefe_project <- function(x, ...) {
 
   print("TODO")
 
+  # return invisibly
+  invisible(x)
 }
 
 #------------------------------------------------
