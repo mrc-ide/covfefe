@@ -123,7 +123,7 @@ Rcpp::List draw_hosts_cpp(Rcpp::List &infection_history, Rcpp::List &args) {
         }
       }
     }
-    // if designated sampling time, sample hosts
+    // if designated sampling time then sample hosts
     if (t==(samp_times[samp_i]-1)) {
       for (int ki=0; ki<int(samp_demes[samp_i].size()); ki++) { // loop through demes
         int k = samp_demes[samp_i][ki]-1;
@@ -190,10 +190,10 @@ Rcpp::List prune_cpp(Rcpp::List &infection_history, Rcpp::List &samp_hosts_raw, 
   int n_samp = samp_times.size();
   int max_samp_time = samp_times[n_samp-1];
   
-  // recover samp_hosts object from samp_hosts_raw. Object is a map of hosts for
-  // each deme and each designated time point. Map key is host ID, map value is 
-  // the number of observable (i.e. bloodstage or infective stage) infections at
-  // that time.
+  // recover samp_hosts object from samp_hosts_raw. samp_hosts is a map of hosts
+  // for each deme and each designated time point. The map key is the host ID,
+  // the map value is the number of observable (i.e. bloodstage or infective
+  // stage) infections at that time.
   vector<vector<map<int, int>>> samp_hosts(demes, vector<map<int, int>>(n_samp));
   Rcpp::List samp_hosts_raw_k;
   vector<int> v;
@@ -208,9 +208,9 @@ Rcpp::List prune_cpp(Rcpp::List &infection_history, Rcpp::List &samp_hosts_raw, 
     }
   }
   
-  // object for storing results. At each time step, records hosts that require
-  // de-novo creation, hosts that require infection and from whom (two values),
-  // and hosts that require deleting.
+  // object for storing results. At each time step, records hosts that require 
+  // de-novo creation, hosts that require infection and from whom (two values), 
+  // and hosts that can be safely deleted as they are never needed again.
   vector<vector<vector<int>>> pruned(max_samp_time, vector<vector<int>>(3));
   
   // create a schedule of hosts that become relevant at each time point. 

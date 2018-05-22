@@ -285,8 +285,6 @@ sim_genotypes <- function(proj, loci, recom_rate) {
   # start timer
   t0 <- Sys.time()
   
-  print(args)
-  
   # run efficient C++ function
   output_raw <- sim_genotypes_cpp(proj$samp_hosts, args)
   

@@ -69,7 +69,7 @@ myproj <- assign_infection_history(myproj, mysim$infection_history)
 
 ### Sampling and pruning
 
-Next, we need to specify how many human hosts we want to sample from.  We do this using a simple matrix or data frame with three columns: column 1 gives the time of sampling, column 2 gives the deme that we are sampling from, and column 3 gives the number of hosts to draw at random from the pool of blood-stage individuals at that point in time. Note that in column 3, a value of -1 indicates that all blood stage hosts should be sampled. In this example, we will sample at day 100 and day 365, in a single deme (we only have one deme), and drawing all hosts at the first time point and 100 hosts at the second time point.
+Next, we need to specify how many human hosts we want to sample from, and when.  We do this using a simple matrix or data frame with three columns: column 1 gives the time of sampling, column 2 gives the deme that we are sampling from, and column 3 gives the number of hosts to draw at random from the pool of blood-stage individuals at that point in time. Note that in column 3, a value of -1 indicates that all blood stage hosts should be sampled. In this example, we will sample at day 100 and day 365, in a single deme (we only have one deme), and drawing all hosts at the first time point and 100 hosts at the second time point.
 ```r
 mysamp <- data.frame(times = c(100, 365), demes = 1, hosts = c(-1, 100))
 ```
