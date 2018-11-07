@@ -1,7 +1,37 @@
 
 #pragma once
 
+#define RCPP_ACTIVE
+
+#ifdef RCPP_ACTIVE
 #include <Rcpp.h>
+#endif
+
+#include <vector>
+#include <string>
+
+//------------------------------------------------
+// define matrix of integers using nested vectors
+std::vector<std::vector<int>> matrix_int(int d1);
+std::vector<std::vector<int>> matrix_int(int d1, int d2, int x = 0);
+
+//------------------------------------------------
+// define matrix of doubles using nested vectors
+std::vector<std::vector<double>> matrix_double(int d1);
+std::vector<std::vector<double>> matrix_double(int d1, int d2, double x = 0.0);
+
+//------------------------------------------------
+// define 3d array of integers using nested vectors
+std::vector<std::vector<std::vector<int>>> array_int(int d1);
+std::vector<std::vector<std::vector<int>>> array_int(int d1, int d2);
+std::vector<std::vector<std::vector<int>>> array_int(int d1, int d2, int d3, int x = 0);
+
+//------------------------------------------------
+// define 4d array of integers using nested vectors
+std::vector<std::vector<std::vector<std::vector<int>>>> array_int_4d(int d1);
+std::vector<std::vector<std::vector<std::vector<int>>>> array_int_4d(int d1, int d2);
+std::vector<std::vector<std::vector<std::vector<int>>>> array_int_4d(int d1, int d2, int d3);
+std::vector<std::vector<std::vector<std::vector<int>>>> array_int_4d(int d1, int d2, int d3, int d4, int x);
 
 //------------------------------------------------
 // basic sum over elements in a vector (templated for different data types).
@@ -34,6 +64,15 @@ void col_sums(std::vector<TYPE> &ret, std::vector<std::vector<TYPE>> &x) {
       ret[j] += x[i][j];
     }
   }
+}
+
+//------------------------------------------------
+// erases particular element of a vector using efficient method. Warning - does
+// not preserve original order of vector
+template<class TYPE>
+void quick_erase(std::vector<TYPE> &v, int index) {
+  v[index] = v.back();
+  v.pop_back();
 }
 
 //------------------------------------------------

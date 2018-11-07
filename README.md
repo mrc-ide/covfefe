@@ -31,7 +31,7 @@ By using the infection history as the starting point we ensure that multiple epi
 * Linux (Debian/Ubuntu)
     - Install the core software development utilities required for R package development as well as LaTeX by executing
 
-            ```
+            ```r
             sudo apt-get install r-base-dev texlive-full
             ```
 

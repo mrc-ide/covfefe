@@ -5,6 +5,7 @@
 
 #' @useDynLib covfefe
 #' @import assertthat
+#' @import ggplot2
 #' @importFrom Rcpp sourceCpp
 #' @import stats
 #' @import graphics

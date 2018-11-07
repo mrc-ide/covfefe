@@ -6,41 +6,66 @@
 \usage{
 sim_indiv(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 22,
   v = 10, g = 10, r = 1/20, b = 1, c = 1, Ih_init = 10, H = 1000,
-  M = 1000, max_infections = 5, migration_matrix = matrix(1),
-  H_auto = FALSE)
+  M = 1000, max_innoculations = 5, migration_matrix = matrix(1),
+  H_auto = FALSE, output_innoculations = TRUE,
+  output_infection_history = FALSE)
 }
 \arguments{
-\item{max_time}{run simulation for this many days}
+\item{max_time}{run simulation for this many days.}
 
-\item{a}{human blood feeding rate. The proportion of mosquitoes that feed on humans each day.}
+\item{a}{human blood feeding rate. The proportion of mosquitoes that feed on
+humans each day.}
 
 \item{p}{mosquito probability of surviving one day.}
 
-\item{mu}{mosquito instantaneous death rate. mu = -log(p) unless otherwise specified.}
+\item{mu}{mosquito instantaneous death rate. mu = -log(p) unless otherwise
+specified.}
 
-\item{u}{intrinsic incubation period. The number of days from infection to becoming infectious in a human host.}
+\item{u}{intrinsic incubation period. The number of days from infection to
+becoming infectious in a human host.}
 
-\item{v}{extrinsic incubation period. The number of days from infection to becoming infectious in a mosquito.}
+\item{v}{extrinsic incubation period. The number of days from infection to
+becoming infectious in a mosquito.}
 
-\item{g}{lag time between human bloodstage infection and production of gametocytes.}
+\item{g}{lag time between human bloodstage infection and production of
+gametocytes.}
 
 \item{r}{daily recovery rate.}
 
-\item{b}{probability a human becomes infected after being bitten by an infected mosquito.}
+\item{b}{probability a human becomes infected after being bitten by an
+infected mosquito.}
 
-\item{c}{probability a mosquito becomes infected after biting an infected human.}
+\item{c}{probability a mosquito becomes infected after biting an infected
+human.}
 
-\item{Ih_init}{initial number of infectious humans in each deme.}
+\item{Ih_init}{vector or scalar specifying initial number of infectious
+humans in each deme. If scalar then the same value is used for all demes.}
 
-\item{H}{human population size in each deme.}
+\item{H}{vector or scalar specifying human population size in each deme. If 
+scalar then the same value is used for all demes. Alternatively, if
+\code{H_auto} is \code{TRUE} then this parameter is ignored and human
+population sizes are chosed automatically from the migration matrix.}
 
-\item{M}{mosquito population size (number of adult female mosquitoes) in each deme.}
+\item{M}{vector or scalar specifying mosquito population size (strictly the
+number of adult female mosquitoes) in each deme. If scalar then the same
+value is used for all demes.}
 
-\item{max_infections}{maximum number of infections that an individual can hold simultaneously.}
+\item{max_innoculations}{maximum number of innoculations that an individual
+can experience before becoming completely immune.}
 
-\item{migration_matrix}{matrix giving the probability of migrating from current deme (rows) to new deme (columns).}
+\item{migration_matrix}{matrix giving the probability of migrating from 
+current deme (in rows) to new deme (in columns). Diagonal elements are
+ignored.}
 
-\item{H_auto}{if TRUE then human population sizes are chosen automatically based on the migration matrix. In this case the total number of humans is equal to sum(H).}
+\item{H_auto}{if TRUE then human population sizes are chosen automatically
+based on the migration matrix. In this case the total number of humans is
+equal to sum(H).}
+
+\item{output_innoculations}{whether to output daily counts of the number of 
+individuals with each possible number of innoculations (from 0 up to
+\code{max_innoculations}).}
+
+\item{output_infection_history}{whether to output complete infection history.}
 }
 \description{
 Simulate from simple individual-based model

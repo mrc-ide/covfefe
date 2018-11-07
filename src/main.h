@@ -4,6 +4,10 @@
 #include <Rcpp.h>
 
 //------------------------------------------------
+// draw from individual-based model
+Rcpp::List indiv_sim_cpp(Rcpp::List args);
+
+//------------------------------------------------
 // simulate population and draw blood stage hosts at designated times
 Rcpp::List draw_hosts(Rcpp::List &infection_history, Rcpp::List &args);
 

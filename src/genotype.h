@@ -21,7 +21,7 @@ public:
   // constructors
   genotype();
   
-  // other functions
+  // methods
   void de_novo(std::vector<std::vector<int>> &loci, int z);
   
 };

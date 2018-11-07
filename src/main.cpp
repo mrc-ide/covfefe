@@ -1,9 +1,61 @@
 
+#include "base_model.Parameters.h"
+#include "base_model.Dispatcher.h"
 #include "misc.h"
 #include "probability.h"
 #include "genotype.h"
 
 using namespace std;
+
+//------------------------------------------------
+// main function (when not run using Rcpp)
+#ifndef RCPP_ACTIVE
+int main(int argc, const char * argv[]) {
+  indiv_sim_cpp();
+}
+#endif
+
+//------------------------------------------------
+// draw from simple individual-based model
+#ifdef RCPP_ACTIVE
+// [[Rcpp::export]]
+Rcpp::List indiv_sim_cpp(Rcpp::List args) {
+  
+  // extract model parameters into separate class
+  Parameters parameters(args);
+  
+  // create simulation dispatcher object
+  Dispatcher dispatcher;
+  
+  // carry out simulation
+  dispatcher.simulate();
+  
+  return Rcpp::List::create(Rcpp::Named("Sh_store") = dispatcher.demes[0].Sh_store);
+  /*
+  // return results as list
+  return Rcpp::List::create(Rcpp::Named("Sh_store") = indiv_sim.Sh_store,
+                            Rcpp::Named("Ih_store") = indiv_sim.Ih_store,
+  Rcpp::Named("EIR_store") = indiv_sim.EIR_store,
+  Rcpp::Named("innoculations") = indiv_sim.innoculations_full,
+  Rcpp::Named("infection_history") = indiv_sim.history_full);
+  */
+  
+}
+#else
+int indiv_sim_cpp() {
+  
+  // extract model parameters into separate class
+  Parameters parameters;
+  
+  // create simulation dispatcher object
+  Dispatcher dispatcher;
+  
+  // carry out simulation
+  dispatcher.simulate();
+  
+  return 0;
+}
+#endif
 
 //------------------------------------------------
 // simulate population and draw blood stage hosts at designated times

@@ -6,36 +6,61 @@
 #' 
 #' @details TODO
 #'
-#' @param max_time run simulation for this many days
-#' @param a human blood feeding rate. The proportion of mosquitoes that feed on humans each day.
+#' @param max_time run simulation for this many days.
+#' @param a human blood feeding rate. The proportion of mosquitoes that feed on
+#'   humans each day.
 #' @param p mosquito probability of surviving one day.
-#' @param mu mosquito instantaneous death rate. mu = -log(p) unless otherwise specified.
-#' @param u intrinsic incubation period. The number of days from infection to becoming infectious in a human host.
-#' @param v extrinsic incubation period. The number of days from infection to becoming infectious in a mosquito.
-#' @param g lag time between human bloodstage infection and production of gametocytes.
+#' @param mu mosquito instantaneous death rate. mu = -log(p) unless otherwise
+#'   specified.
+#' @param u intrinsic incubation period. The number of days from infection to
+#'   blood-stage infection in a human host
+#' @param v extrinsic incubation period. The number of days from infection to
+#'   becoming infectious in a mosquito.
+#' @param g lag time between human blood-stage infection and production of
+#'   gametocytes.
 #' @param r daily recovery rate.
-#' @param b probability a human becomes infected after being bitten by an infected mosquito.
-#' @param c probability a mosquito becomes infected after biting an infected human.
-#' @param Ih_init initial number of infectious humans in each deme.
-#' @param H human population size in each deme.
-#' @param M mosquito population size (number of adult female mosquitoes) in each deme.
-#' @param max_infections maximum number of infections that an individual can hold simultaneously.
-#' @param migration_matrix matrix giving the probability of migrating from current deme (rows) to new deme (columns).
-#' @param H_auto if TRUE then human population sizes are chosen automatically based on the migration matrix. In this case the total number of humans is equal to sum(H).
+#' @param b probability a human becomes infected after being bitten by an
+#'   infected mosquito.
+#' @param c probability a mosquito becomes infected after biting an infected
+#'   human.
+#' @param Ih_init vector or scalar specifying initial number of infectious
+#'   humans in each deme. If scalar then the same value is used for all demes.
+#' @param H vector or scalar specifying human population size in each deme. If 
+#'   scalar then the same value is used for all demes. Alternatively, if
+#'   \code{H_auto} is \code{TRUE} then this parameter is ignored and human
+#'   population sizes are chosed automatically from the migration matrix.
+#' @param M vector or scalar specifying mosquito population size (strictly the
+#'   number of adult female mosquitoes) in each deme. If scalar then the same
+#'   value is used for all demes.
+#' @param max_innoculations maximum number of innoculations that an individual
+#'   can experience before becoming completely immune.
+#' @param migration_matrix matrix giving the probability of migrating from 
+#'   current deme (in rows) to new deme (in columns). Diagonal elements are
+#'   ignored.
+#' @param H_auto if TRUE then human population sizes are chosen automatically
+#'   based on the migration matrix. In this case the total number of humans is
+#'   equal to sum(H).
+#' @param demog distribution of the number of hosts in each 1-year age bin.
+#' @param output_counts whether to output daily counts of key quantities, such
+#'   as the number of infected hosts and the EIR.
+#' @param output_innoculations whether to output daily counts of the number of 
+#'   individuals with each possible number of innoculations (from 0 up to
+#'   \code{max_innoculations}).
+#' @param output_infection_history whether to output complete infection history.
+#' @param silent whether to write messages to console.
 #'
 #' @export
 #' @examples
 #' # TODO
 
-sim_indiv <- function(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 22, v = 10, g = 10, r = 1/20, b = 1, c = 1, Ih_init = 10, H = 1000, M = 1000, max_infections = 5, migration_matrix = matrix(1), H_auto = FALSE) {
+sim_indiv <- function(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 10, v = 10, g = 10, r = 1/20, b = 1, c = 1, Ih_init = 10, H = 1000, M = 1000, max_innoculations = 5, migration_matrix = matrix(1), H_auto = FALSE, demog = dgeom(1:100, prob=1/20), output_counts = TRUE, output_innoculations = TRUE, output_infection_history = FALSE, silent = FALSE) {
   
   # check arguments
   assert_pos_int(max_time, zero_allowed = FALSE)
   assert_pos(a)
-  assert_bounded(p, left = 0, inclusive_left = FALSE)
+  assert_bounded(p, inclusive_left = FALSE, inclusive_right = FALSE)
   assert_pos(mu)
   assert_pos_int(u, zero_allowed = FALSE)
-  assert_that(max_time>=u)  # TODO - remove constraint?
   assert_pos_int(v, zero_allowed = FALSE)
   assert_pos_int(g, zero_allowed = FALSE)
   assert_pos(r)
@@ -43,22 +68,31 @@ sim_indiv <- function(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
   assert_bounded(c)
   assert_pos_int(Ih_init)
   assert_pos_int(H, zero_allowed = FALSE)
-  assert_pos_int(M, zero_allowed = TRUE)
-  assert_pos_int(max_infections, zero_allowed = FALSE)
-  if (!H_auto) {
-    assert_same_length(Ih_init, H, M)
-  }
-  assert_same_length(Ih_init, M)
-  assert_that(all(Ih_init <= H))
+  assert_pos_int(M)
+  assert_pos_int(max_innoculations, zero_allowed = FALSE)
+  assert_square_matrix(migration_matrix)
   assert_bounded(migration_matrix)
-  demes <- length(M)
-  assert_that(nrow(migration_matrix) == demes, msg = sprintf("migration matrix must have %s rows and columns to match other inputs", demes))
-  assert_that(all(rowSums(migration_matrix)<=1), msg = "row sums of migration matrix cannot exceed 1")
+  assert_that(all(rowSums(migration_matrix) <= 1), msg = "row sums of migration matrix cannot exceed 1")
+  n_demes <- nrow(migration_matrix)
+  assert_in(length(Ih_init), c(1, n_demes))
+  assert_in(length(H), c(1, n_demes))
+  assert_in(length(M), c(1, n_demes))
+  assert_logical(H_auto)
+  assert_pos(demog)
+  assert_logical(output_counts)
+  assert_logical(output_innoculations)
+  assert_logical(output_infection_history)
+  
+  # force some scalar inputs to vector
+  Ih_init <- force_vector(Ih_init, n_demes)
+  H <- force_vector(H, n_demes)
+  M <- force_vector(M, n_demes)
+  assert_leq(Ih_init, H)
   
   # fill in migration matrix diagonal elements and test if there is any migration
   diag(migration_matrix) <- 0
   diag(migration_matrix) <- 1 - rowSums(migration_matrix)
-  any_migration <- sum(diag(migration_matrix)) < demes
+  any_migration <- (sum(diag(migration_matrix)) < n_demes)
   
   # if any migration then calculate expected human population sizes
   if (any_migration) {
@@ -69,17 +103,17 @@ sim_indiv <- function(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
     mig_eigen <- mig_eigen/sum(mig_eigen)
     H_expected <- round(sum(H)*mig_eigen)
     
-    # it is still possible that H_expected is not stable due to rounding errors.
-    # Step forward until H_expected no longer changes
-    H_prev <- rep(0,demes)
+    # it is still possible that H_expected is not stable due to rounding errors,
+    # therefore step forward until H_expected no longer changes
+    H_prev <- rep(0,n_demes)
     while(any(H_expected != H_prev)) {
       H_prev <- H_expected
       H_expected <- round(as.vector(crossprod(H_expected, migration_matrix)))
     }
   } else {  # if no migration
     
-    # share human hosts equally between demes
-    H_expected <- round(rep(sum(H)/demes, demes))
+    # share expected human hosts equally between demes
+    H_expected <- round(rep(sum(H)/n_demes, n_demes))
   }
   
   # set human population sizes automatically
@@ -94,15 +128,15 @@ sim_indiv <- function(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
   }
   
   # calculate number of individuals that move each generation
-  delta_mig <- round(outer(H, rep(1,demes)) * migration_matrix * (1-diag(1,demes)))
+  delta_mig <- round(outer(H, rep(1,n_demes)) * migration_matrix * (1-diag(1,n_demes)))
   
   # it is still possible that delta_mig does not represent stable migration due 
   # to rounding errors Calculate discrepancies and alter matrix until completely
   # stable
   if (any_migration) {
     discrep <- rowSums(delta_mig) - colSums(delta_mig)
-    for (k in 1:(demes-1)) {
-      discrep_diff <- abs(discrep[k] + discrep[(k+1):demes])
+    for (k in 1:(n_demes-1)) {
+      discrep_diff <- abs(discrep[k] + discrep[(k+1):n_demes])
       best_diff <- k + which.min(discrep_diff)
       delta_mig[k,best_diff] <- delta_mig[k,best_diff] - discrep[k]
       discrep <- rowSums(delta_mig) - colSums(delta_mig)
@@ -122,9 +156,13 @@ sim_indiv <- function(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
                Ih_init = Ih_init,
                H = H,
                M = M,
-               max_infections = max_infections,
+               max_innoculations = max_innoculations,
                delta_mig = mat_to_rcpp(delta_mig),
-               demes = demes
+               demog = demog,
+               output_counts = output_counts,
+               output_innoculations = output_innoculations,
+               output_infection_history = output_infection_history,
+               R_draws = R_draws
   )
   
   # start timer
@@ -133,22 +171,50 @@ sim_indiv <- function(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
   # run efficient C++ function
   output_raw <- indiv_sim_cpp(args)
   
-  # process output
-  daily_counts <- list()
-  for (k in 1:demes) {
-    daily_counts[[k]] <- cbind(1:max_time, rcpp_to_mat(output_raw$daily_counts[[k]]))
-    colnames(daily_counts[[k]]) <- c("time", "Sh", paste0("Ih", 1:max_infections))
-  }
-  names(daily_counts) <- paste0("deme", 1:demes)
+  return(output_raw)
   
-  # create custom class
-  ret <- list(H = H,
-              daily_counts = daily_counts,
-              infection_history = output_raw$infection_history)
+  # create return object
+  ret <- list()
   class(ret) <- "covfefe_indiv"
   
+  # process counts
+  if (output_counts) {
+    counts <- list()
+    for (k in 1:n_demes) {
+      Sh_store <- output_raw$Sh_store[[k]]
+      Ih_store <- output_raw$Ih_store[[k]]
+      EIR_store <- output_raw$EIR_store[[k]]
+      counts[[k]] <- cbind(time = 1:max_time, 
+                           Sh = Sh_store,
+                           Ih = Ih_store,
+                           EIR = EIR_store)
+    }
+    names(counts) <- paste0("deme", 1:n_demes)
+    ret$counts <- counts
+  }
+  
+  # process innoculations
+  if (output_innoculations) {
+    innoculations <- list()
+    for (k in 1:n_demes) {
+      raw_innoculations <- rcpp_to_mat(output_raw$innoculations[[k]])
+      colnames(raw_innoculations) <- paste0("Ih", 0:max_innoculations)
+      innoculations[[k]] <- cbind(time = 1:max_time,
+                                  raw_innoculations)
+    }
+    names(innoculations) <- paste0("deme", 1:n_demes)
+    ret$innoculations <- innoculations
+  }
+  
+  # process infection history
+  if (output_infection_history) {
+    ret$infection_history <- output_raw$infection_history
+  }
+  
   # end timer
-  message(sprintf("completed in %s seconds", round(Sys.time() - t0, 2)))
+  if (!silent) {
+    message(sprintf("completed in %s seconds", round(Sys.time() - t0, 2))) 
+  }
   
   # return invisibly
   invisible(ret)
@@ -157,7 +223,7 @@ sim_indiv <- function(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 22, v 
 #------------------------------------------------
 # overload print() function for covfefe_indiv
 # (not exported)
-
+#' @noRd
 print.covfefe_indiv <- function(x, ...) {
 
   # print without class name
@@ -170,7 +236,7 @@ print.covfefe_indiv <- function(x, ...) {
 #------------------------------------------------
 # overload summary() function for covfefe_indiv
 # (not exported)
-
+#' @noRd
 summary.covfefe_indiv <- function(x, ...) {
 
   print("TODO")
@@ -180,7 +246,7 @@ summary.covfefe_indiv <- function(x, ...) {
 #------------------------------------------------
 # determine if object is of class covfefe_indiv
 # (not exported)
-
+#' @noRd
 is.covfefe_indiv <- function(x) {
   inherits(x, "covfefe_indiv")
 }

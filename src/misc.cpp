@@ -4,6 +4,51 @@
 using namespace std;
 
 //------------------------------------------------
+// define matrix of integers using nested vectors
+vector<vector<int>> matrix_int(int d1) {
+  return vector<vector<int>>(d1);
+}
+vector<vector<int>> matrix_int(int d1, int d2, int x) {
+  return vector<vector<int>>(d1, vector<int>(d2, x));
+}
+
+//------------------------------------------------
+// define matrix of doubles using nested vectors
+vector<vector<double>> matrix_double(int d1) {
+  return vector<vector<double>>(d1);
+}
+vector<vector<double>> matrix_double(int d1, int d2, double x) {
+  return vector<vector<double>>(d1, vector<double>(d2, x));
+}
+
+//------------------------------------------------
+// define 3d array of integers using nested vectors
+vector<vector<vector<int>>> array_int(int d1) {
+  return vector<vector<vector<int>>>(d1);
+}
+vector<vector<vector<int>>> array_int(int d1, int d2) {
+  return vector<vector<vector<int>>>(d1, vector<vector<int>>(d2));
+}
+vector<vector<vector<int>>> array_int(int d1, int d2, int d3, int x) {
+  return vector<vector<vector<int>>>(d1, vector<vector<int>>(d2, vector<int>(d3, x)));
+}
+
+//------------------------------------------------
+// define 4d array of integers using nested vectors
+vector<vector<vector<vector<int>>>> array_int_4d(int d1) {
+  return vector<vector<vector<vector<int>>>>(d1);
+}
+vector<vector<vector<vector<int>>>> array_int_4d(int d1, int d2) {
+  return vector<vector<vector<vector<int>>>>(d1, vector<vector<vector<int>>>(d2));
+}
+vector<vector<vector<vector<int>>>> array_int_4d(int d1, int d2, int d3) {
+  return vector<vector<vector<vector<int>>>>(d1, vector<vector<vector<int>>>(d2, vector<vector<int>>(d3)));
+}
+vector<vector<vector<vector<int>>>> array_int_4d(int d1, int d2, int d3, int d4, int x) {
+  return vector<vector<vector<vector<int>>>>(d1, vector<vector<vector<int>>>(d2, vector<vector<int>>(d3, vector<int>(d4, x))));
+}
+
+//------------------------------------------------
 // basic sum over elements in a vector (templated for different data types)
 // sum
 // DEFINED IN HEADER
@@ -16,6 +61,11 @@ using namespace std;
 //------------------------------------------------
 // sum over columns of a matrix (templated for different data types)
 // col_sums
+// DEFINED IN HEADER
+
+//------------------------------------------------
+// erases particular element of a vector using efficient method
+// quick_erase
 // DEFINED IN HEADER
 
 //------------------------------------------------
