@@ -3,4 +3,5 @@
 .RData
 .Ruserdata
 ignore/
+src/covfefe_executable/
 *.Rproj

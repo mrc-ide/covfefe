@@ -1,10 +1,9 @@
 
 #include "genotype.h"
-#include "misc.h"
 #include "probability.h"
 
 using namespace std;
-
+/*
 //------------------------------------------------
 // default constructor for genotype class
 genotype::genotype() {
@@ -165,4 +164,4 @@ vector<vector<int>> recombine(vector<vector<int>> &gen1, vector<vector<int>> &ge
   return ret;
 }
 
-
+*/

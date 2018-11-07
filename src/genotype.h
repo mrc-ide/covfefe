@@ -1,8 +1,12 @@
 
 #pragma once
 
-#include <Rcpp.h>
+#include "misc.h"
 
+#ifdef RCPP_ACTIVE
+#include <Rcpp.h>
+#endif
+/*
 //------------------------------------------------
 // class defining genotype
 class genotype {
@@ -34,4 +38,4 @@ void genotype_infect(genotype &source, genotype &dest, std::vector<double> &dist
 // recombine two genotypes
 std::vector<std::vector<int>> recombine(std::vector<std::vector<int>> &gen1, std::vector<std::vector<int>> &gen2, std::vector<std::vector<int>> &loci, double recom_rate);
 
-
+*/

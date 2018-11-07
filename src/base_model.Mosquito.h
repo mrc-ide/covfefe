@@ -1,7 +1,11 @@
 
 #pragma once
 
+#include "misc.h"
+
+#ifdef RCPP_ACTIVE
 #include <Rcpp.h>
+#endif
 
 //------------------------------------------------
 // class defining mosquito

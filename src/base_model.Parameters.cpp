@@ -1,6 +1,7 @@
 
 #include "base_model.Parameters.h"
-#include "misc.h"
+
+#include <cmath>
 
 using namespace std;
 
@@ -16,7 +17,7 @@ int Parameters::g;
 double Parameters::r;
 vector<double> Parameters::b;
 double Parameters::c;
-vector<int> Parameters::Ih_vec;
+vector<int> Parameters::Eh_vec;
 vector<int> Parameters::H_vec;
 vector<int> Parameters::M_vec;
 int Parameters::max_innoculations;
@@ -31,7 +32,43 @@ double Parameters::prob_v_death;
 double Parameters::prob_h_recovery;
 
 //------------------------------------------------
-// constructor for Parameters class
+// constructor
+#ifdef RCPP_ACTIVE
+Parameters::Parameters() {}
+#else
+Parameters::Parameters() {
+  
+  // extract model parameters
+  max_time = 365*5;
+  a = 0.3;
+  mu = -log(0.9);
+  u = 10;
+  v = 10;
+  g = 10;
+  r = 1.0/20;
+  b = vector<double>(1, 1.0);
+  c = 1.0;
+  int n_demes0 = 1;
+  Eh_vec = vector<int>(n_demes0, 100);
+  H_vec = vector<int>(n_demes0, 1000);
+  M_vec = vector<int>(n_demes0, 1000);
+  max_innoculations = 5;
+  //delta_mig = rcpp_to_matrix_double(args["delta_mig"]);
+  demog = {100};
+  output_counts = true;
+  output_innoculations = true;
+  output_infection_history = false;
+  n_demes = int(H_vec.size());
+  
+  // daily probability of mosquito death
+  prob_v_death = 1 - exp(-mu);
+  prob_h_recovery = 1 - exp(-r);
+}
+#endif
+
+//------------------------------------------------
+// constructor
+#ifdef RCPP_ACTIVE
 Parameters::Parameters(const Rcpp::List &args) {
   
   // extract model parameters
@@ -44,7 +81,7 @@ Parameters::Parameters(const Rcpp::List &args) {
   r = rcpp_to_double(args["r"]);
   b = rcpp_to_vector_double(args["b"]);
   c = rcpp_to_double(args["c"]);
-  Ih_vec = rcpp_to_vector_int(args["Ih_init"]);
+  Eh_vec = rcpp_to_vector_int(args["Eh_init"]);
   H_vec = rcpp_to_vector_int(args["H"]);
   M_vec = rcpp_to_vector_int(args["M"]);
   max_innoculations = rcpp_to_int(args["max_innoculations"]);
@@ -58,5 +95,6 @@ Parameters::Parameters(const Rcpp::List &args) {
   // daily probability of mosquito death
   prob_v_death = 1 - exp(-mu);
   prob_h_recovery = 1 - exp(-r);
-  
 }
+#endif
+

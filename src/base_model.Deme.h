@@ -1,16 +1,19 @@
 
 #pragma once
 
+#include "misc.h"
 #include "base_model.Parameters.h"
 #include "base_model.Population.h"
-#include "base_model.Scheduler.h"
 #include "base_model.Host.h"
 #include "base_model.Mosquito.h"
+
+#ifdef RCPP_ACTIVE
 #include <Rcpp.h>
+#endif
 
 //------------------------------------------------
 // single deme of individual-based simulation model
-class Deme : public Population, public Scheduler {
+class Deme : public Population, public Parameters {
   
 public:
   
@@ -21,19 +24,12 @@ public:
   // index of this deme
   int this_deme;
   
-  // counts of host types
+  // number of hosts
   int H;
-  int Sh;
-  int Ih;
   
-  // indices of hosts in this deme
-  std::vector<int> hosts_uninfective;
-  std::vector<int> hosts_infective;
-  
-  // total beta values (host infectiousness)
-  double beta_uninfective;
-  double beta_infective;
-  double beta_total;
+  // store the integer index of hosts in this deme
+  std::vector<int> host_vec;
+  std::vector<int> host_infective_vec;
   
   // counts of mosquito types
   int M;
@@ -45,15 +41,6 @@ public:
   std::vector<int> Ev_death;
   int ringtime;
   
-  // objects for storing daily counts
-  std::vector<int> Sh_store;
-  std::vector<int> Ih_store;
-  std::vector<double> EIR_store;
-  
-  // object for storing the number of hosts that carry each possible 
-  // number of innoculations
-  std::vector<std::vector<int>> innoculations_store;
-  
   // infection history list for storing complete history of events
   /*
   std::vector<int> history_migration;
@@ -63,6 +50,9 @@ public:
   std::vector<std::vector<std::vector<int>>> history_full;
   */
   
+  // misc
+  double EIR;
+  
   
   // PUBLIC FUNCTIONS
   
@@ -71,9 +61,8 @@ public:
   Deme(int this_deme);
   
   // methods
-  void get_beta();
-  void init(std::vector<int> &hosts_uninfective, int Ih);
-  void human_infection(int host_index, Mosquito &mosq, int t);
+  void init(std::vector<int> &host_vec0, int Eh);
+  void human_infection(int this_host, Mosquito &mosq, int t);
   void step_forward(int t);
   
 };

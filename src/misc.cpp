@@ -1,6 +1,8 @@
 
 #include "misc.h"
 
+#include <math.h>
+
 using namespace std;
 
 //------------------------------------------------
@@ -91,57 +93,89 @@ vector<vector<vector<vector<int>>>> array_int_4d(int d1, int d2, int d3, int d4,
 //------------------------------------------------
 // print simple bar-graph composed of title followed by n stars
 void print_stars(string title, int n) {
-    Rcpp::Rcout << title << " ";
-    for (int i=0; i<n; i++) {
-        Rcpp::Rcout << "*";
-    }
-    Rcpp::Rcout << "\n";
-    R_FlushConsole();
+#ifdef RCPP_ACTIVE
+  Rcpp::Rcout << title << " ";
+  for (int i=0; i<n; i++) {
+      Rcpp::Rcout << "*";
+  }
+  Rcpp::Rcout << "\n";
+  R_FlushConsole();
+#else
+  std::cout << title << " ";
+  for (int i=0; i<n; i++) {
+    std::cout << "*";
+  }
+  std::cout << "\n";
+#endif
 }
 
 //------------------------------------------------
-// print "foo", with option number e.g. "foo2"
+// print "foo", with optional number e.g. "foo2"
 void foo(int n) {
-    if (n==0) {
-        Rcpp::Rcout << "foo\n";
-    } else {
-        Rcpp::Rcout << "foo" << n << "\n";
-    }
-    R_FlushConsole();
+#ifdef RCPP_ACTIVE
+  if (n==0) {
+      Rcpp::Rcout << "foo\n";
+  } else {
+      Rcpp::Rcout << "foo" << n << "\n";
+  }
+  R_FlushConsole();
+#else
+  if (n==0) {
+    std::cout << "foo\n";
+  } else {
+    std::cout << "foo" << n << "\n";
+  }
+#endif
 }
 
 //------------------------------------------------
-// print "bar", with option number e.g. "bar2"
+// print "bar", with optional number e.g. "bar2"
 void bar(int n) {
-    if (n==0) {
-        Rcpp::Rcout << "bar\n";
-    } else {
-        Rcpp::Rcout << "bar" << n << "\n";
-    }
-    R_FlushConsole();
+#ifdef RCPP_ACTIVE
+  if (n==0) {
+      Rcpp::Rcout << "bar\n";
+  } else {
+      Rcpp::Rcout << "bar" << n << "\n";
+  }
+  R_FlushConsole();
+#else
+  if (n==0) {
+    std::cout << "bar\n";
+  } else {
+    std::cout << "bar" << n << "\n";
+  }
+#endif
 }
 
 //------------------------------------------------
-// print "foobar", with option number e.g. "foobar2"
+// print "foobar", with optional number e.g. "foobar2"
 void foobar(int n) {
-    if (n==0) {
-        Rcpp::Rcout << "foobar\n";
-    } else {
-        Rcpp::Rcout << "foobar" << n << "\n";
-    }
-    R_FlushConsole();
+#ifdef RCPP_ACTIVE
+  if (n==0) {
+      Rcpp::Rcout << "foobar\n";
+  } else {
+      Rcpp::Rcout << "foobar" << n << "\n";
+  }
+  R_FlushConsole();
+#else
+  if (n==0) {
+    std::cout << "foobar\n";
+  } else {
+    std::cout << "foobar" << n << "\n";
+  }
+#endif
 }
 
 //------------------------------------------------
 // analogue of R function seq() for integers
 vector<int> seq_int(int from, int to, int by) {
-    int n = floor((to-from)/double(by)) + 1;
-    vector<int> ret(n,from);
-    for (int i=1; i<n; i++) {
-        from += by;
-        ret[i] = from;
-    }
-    return ret;
+  int n = floor((to-from)/double(by)) + 1;
+  vector<int> ret(n,from);
+  for (int i=1; i<n; i++) {
+      from += by;
+      ret[i] = from;
+  }
+  return ret;
 }
 
 //------------------------------------------------
@@ -150,42 +184,55 @@ vector<int> seq_int(int from, int to, int by) {
 // DEFINED IN HEADER
 
 //------------------------------------------------
+#ifdef RCPP_ACTIVE
 // converts input from Rcpp::SEXP format to bool format.
 int rcpp_to_bool(SEXP x) {
   return Rcpp::as<bool>(x);
 }
+#endif
 
 //------------------------------------------------
+#ifdef RCPP_ACTIVE
 // converts input from Rcpp::SEXP format to int format.
 int rcpp_to_int(SEXP x) {
   return Rcpp::as<int>(x);
 }
+#endif
 
 //------------------------------------------------
+#ifdef RCPP_ACTIVE
 // converts input from Rcpp::SEXP format to double format.
 double rcpp_to_double(SEXP x) {
   return Rcpp::as<double>(x);
 }
+#endif
 
 //------------------------------------------------
+#ifdef RCPP_ACTIVE
 // converts input from Rcpp::List format to vector<bool> format.
 vector<bool> rcpp_to_vector_bool(SEXP x) {
   return Rcpp::as<vector<bool> >(x);
 }
+#endif
 
 //------------------------------------------------
+#ifdef RCPP_ACTIVE
 // converts input from Rcpp::List format to vector<int> format.
 vector<int> rcpp_to_vector_int(SEXP x) {
     return Rcpp::as<vector<int> >(x);
 }
+#endif
 
 //------------------------------------------------
+#ifdef RCPP_ACTIVE
 // converts input from Rcpp::List format to vector<double> format.
 vector<double> rcpp_to_vector_double(SEXP x) {
     return Rcpp::as<vector<double> >(x);
 }
+#endif
 
 //------------------------------------------------
+#ifdef RCPP_ACTIVE
 // converts input from Rcpp::List format to vector<vector<int>> format.
 vector<vector<int>> rcpp_to_matrix_int(Rcpp::List x) {
     int nrow = int(x.size());
@@ -195,8 +242,10 @@ vector<vector<int>> rcpp_to_matrix_int(Rcpp::List x) {
     }
     return x_mat;
 }
+#endif
 
 //------------------------------------------------
+#ifdef RCPP_ACTIVE
 // converts input from Rcpp::List format to vector<vector<double>> format.
 vector<vector<double>> rcpp_to_matrix_double(Rcpp::List x) {
     int nrow = int(x.size());
@@ -206,8 +255,10 @@ vector<vector<double>> rcpp_to_matrix_double(Rcpp::List x) {
     }
     return x_mat;
 }
+#endif
 
 //------------------------------------------------
+#ifdef RCPP_ACTIVE
 // converts input from Rcpp::List format to vector<vector<vector<int>>> format.
 vector<vector<vector<int>>> rcpp_to_array_int(Rcpp::List x) {
     int n1 = int(x.size());
@@ -222,8 +273,10 @@ vector<vector<vector<int>>> rcpp_to_array_int(Rcpp::List x) {
     }
     return ret;
 }
+#endif
 
 //------------------------------------------------
+#ifdef RCPP_ACTIVE
 // converts input from Rcpp::List format to vector<vector<vector<double>>> format.
 vector<vector<vector<double>>> rcpp_to_array_double(Rcpp::List x) {
     int n1 = int(x.size());
@@ -238,3 +291,5 @@ vector<vector<vector<double>>> rcpp_to_array_double(Rcpp::List x) {
     }
     return ret;
 }
+#endif
+

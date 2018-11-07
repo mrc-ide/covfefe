@@ -4,11 +4,12 @@
 \alias{sim_indiv}
 \title{Simulate from simple individual-based model}
 \usage{
-sim_indiv(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 22,
-  v = 10, g = 10, r = 1/20, b = 1, c = 1, Ih_init = 10, H = 1000,
-  M = 1000, max_innoculations = 5, migration_matrix = matrix(1),
-  H_auto = FALSE, output_innoculations = TRUE,
-  output_infection_history = FALSE)
+sim_indiv(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 10,
+  v = 10, g = 10, r = 1/20, b = 1, c = 1, Eh_init = 10,
+  H = 1000, M = 1000, max_innoculations = 5,
+  migration_matrix = matrix(1), H_auto = FALSE, demog = dgeom(1:100,
+  prob = 1/20), output_counts = TRUE, output_innoculations = TRUE,
+  output_infection_history = FALSE, silent = FALSE)
 }
 \arguments{
 \item{max_time}{run simulation for this many days.}
@@ -22,12 +23,12 @@ humans each day.}
 specified.}
 
 \item{u}{intrinsic incubation period. The number of days from infection to
-becoming infectious in a human host.}
+blood-stage infection in a human host}
 
 \item{v}{extrinsic incubation period. The number of days from infection to
 becoming infectious in a mosquito.}
 
-\item{g}{lag time between human bloodstage infection and production of
+\item{g}{lag time between human blood-stage infection and production of
 gametocytes.}
 
 \item{r}{daily recovery rate.}
@@ -38,7 +39,7 @@ infected mosquito.}
 \item{c}{probability a mosquito becomes infected after biting an infected
 human.}
 
-\item{Ih_init}{vector or scalar specifying initial number of infectious
+\item{Eh_init}{vector or scalar specifying the initial number of infected
 humans in each deme. If scalar then the same value is used for all demes.}
 
 \item{H}{vector or scalar specifying human population size in each deme. If 
@@ -51,7 +52,7 @@ number of adult female mosquitoes) in each deme. If scalar then the same
 value is used for all demes.}
 
 \item{max_innoculations}{maximum number of innoculations that an individual
-can experience before becoming completely immune.}
+can hold simultaneously.}
 
 \item{migration_matrix}{matrix giving the probability of migrating from 
 current deme (in rows) to new deme (in columns). Diagonal elements are
@@ -61,11 +62,18 @@ ignored.}
 based on the migration matrix. In this case the total number of humans is
 equal to sum(H).}
 
+\item{demog}{distribution of the number of hosts in each 1-year age bin.}
+
+\item{output_counts}{whether to output daily counts of key quantities, such
+as the number of infected hosts and the EIR.}
+
 \item{output_innoculations}{whether to output daily counts of the number of 
 individuals with each possible number of innoculations (from 0 up to
 \code{max_innoculations}).}
 
 \item{output_infection_history}{whether to output complete infection history.}
+
+\item{silent}{whether to write messages to console.}
 }
 \description{
 Simulate from simple individual-based model

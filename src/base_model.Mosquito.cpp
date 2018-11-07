@@ -1,6 +1,5 @@
 
 #include "base_model.Mosquito.h"
-#include "misc.h"
 
 using namespace std;
 

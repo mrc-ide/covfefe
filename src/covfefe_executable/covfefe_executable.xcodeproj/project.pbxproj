@@ -7,7 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8BC4DD7B2190702C00EDC2BE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BC4DD7A2190702C00EDC2BE /* main.cpp */; };
+		8BC4DD95219072AA00EDC2BE /* base_model.Parameters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BC4DD81219072A900EDC2BE /* base_model.Parameters.cpp */; };
+		8BC4DD96219072AA00EDC2BE /* probability.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BC4DD84219072A900EDC2BE /* probability.cpp */; };
+		8BC4DD97219072AA00EDC2BE /* base_model.Deme.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BC4DD86219072A900EDC2BE /* base_model.Deme.cpp */; };
+		8BC4DD98219072AA00EDC2BE /* base_model.Population.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BC4DD89219072A900EDC2BE /* base_model.Population.cpp */; };
+		8BC4DD99219072AA00EDC2BE /* misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BC4DD8A219072A900EDC2BE /* misc.cpp */; };
+		8BC4DD9B219072AA00EDC2BE /* base_model.Host.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BC4DD8F219072A900EDC2BE /* base_model.Host.cpp */; };
+		8BC4DD9C219072AA00EDC2BE /* base_model.Dispatcher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BC4DD91219072A900EDC2BE /* base_model.Dispatcher.cpp */; };
+		8BC4DD9D219072AA00EDC2BE /* base_model.Mosquito.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BC4DD92219072AA00EDC2BE /* base_model.Mosquito.cpp */; };
+		8BC4DD9E219072AA00EDC2BE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BC4DD93219072AA00EDC2BE /* main.cpp */; };
+		8BC4DDA12190798C00EDC2BE /* genotype.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BC4DD9F2190798C00EDC2BE /* genotype.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,7 +33,26 @@
 
 /* Begin PBXFileReference section */
 		8BC4DD772190702C00EDC2BE /* covfefe_executable */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = covfefe_executable; sourceTree = BUILT_PRODUCTS_DIR; };
-		8BC4DD7A2190702C00EDC2BE /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		8BC4DD81219072A900EDC2BE /* base_model.Parameters.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = base_model.Parameters.cpp; path = ../../base_model.Parameters.cpp; sourceTree = "<group>"; };
+		8BC4DD82219072A900EDC2BE /* base_model.Dispatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = base_model.Dispatcher.h; path = ../../base_model.Dispatcher.h; sourceTree = "<group>"; };
+		8BC4DD84219072A900EDC2BE /* probability.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = probability.cpp; path = ../../probability.cpp; sourceTree = "<group>"; };
+		8BC4DD85219072A900EDC2BE /* base_model.Population.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = base_model.Population.h; path = ../../base_model.Population.h; sourceTree = "<group>"; };
+		8BC4DD86219072A900EDC2BE /* base_model.Deme.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = base_model.Deme.cpp; path = ../../base_model.Deme.cpp; sourceTree = "<group>"; };
+		8BC4DD87219072A900EDC2BE /* base_model.Host.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = base_model.Host.h; path = ../../base_model.Host.h; sourceTree = "<group>"; };
+		8BC4DD88219072A900EDC2BE /* base_model.Mosquito.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = base_model.Mosquito.h; path = ../../base_model.Mosquito.h; sourceTree = "<group>"; };
+		8BC4DD89219072A900EDC2BE /* base_model.Population.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = base_model.Population.cpp; path = ../../base_model.Population.cpp; sourceTree = "<group>"; };
+		8BC4DD8A219072A900EDC2BE /* misc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = misc.cpp; path = ../../misc.cpp; sourceTree = "<group>"; };
+		8BC4DD8B219072A900EDC2BE /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = main.h; path = ../../main.h; sourceTree = "<group>"; };
+		8BC4DD8C219072A900EDC2BE /* misc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = misc.h; path = ../../misc.h; sourceTree = "<group>"; };
+		8BC4DD8D219072A900EDC2BE /* base_model.Deme.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = base_model.Deme.h; path = ../../base_model.Deme.h; sourceTree = "<group>"; };
+		8BC4DD8F219072A900EDC2BE /* base_model.Host.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = base_model.Host.cpp; path = ../../base_model.Host.cpp; sourceTree = "<group>"; };
+		8BC4DD90219072A900EDC2BE /* base_model.Parameters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = base_model.Parameters.h; path = ../../base_model.Parameters.h; sourceTree = "<group>"; };
+		8BC4DD91219072A900EDC2BE /* base_model.Dispatcher.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = base_model.Dispatcher.cpp; path = ../../base_model.Dispatcher.cpp; sourceTree = "<group>"; };
+		8BC4DD92219072AA00EDC2BE /* base_model.Mosquito.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = base_model.Mosquito.cpp; path = ../../base_model.Mosquito.cpp; sourceTree = "<group>"; };
+		8BC4DD93219072AA00EDC2BE /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../main.cpp; sourceTree = "<group>"; };
+		8BC4DD94219072AA00EDC2BE /* probability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = probability.h; path = ../../probability.h; sourceTree = "<group>"; };
+		8BC4DD9F2190798C00EDC2BE /* genotype.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = genotype.cpp; path = ../../genotype.cpp; sourceTree = "<group>"; };
+		8BC4DDA02190798C00EDC2BE /* genotype.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = genotype.h; path = ../../genotype.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,7 +85,26 @@
 		8BC4DD792190702C00EDC2BE /* covfefe_executable */ = {
 			isa = PBXGroup;
 			children = (
-				8BC4DD7A2190702C00EDC2BE /* main.cpp */,
+				8BC4DD86219072A900EDC2BE /* base_model.Deme.cpp */,
+				8BC4DD8D219072A900EDC2BE /* base_model.Deme.h */,
+				8BC4DD91219072A900EDC2BE /* base_model.Dispatcher.cpp */,
+				8BC4DD82219072A900EDC2BE /* base_model.Dispatcher.h */,
+				8BC4DD8F219072A900EDC2BE /* base_model.Host.cpp */,
+				8BC4DD87219072A900EDC2BE /* base_model.Host.h */,
+				8BC4DD92219072AA00EDC2BE /* base_model.Mosquito.cpp */,
+				8BC4DD88219072A900EDC2BE /* base_model.Mosquito.h */,
+				8BC4DD81219072A900EDC2BE /* base_model.Parameters.cpp */,
+				8BC4DD90219072A900EDC2BE /* base_model.Parameters.h */,
+				8BC4DD89219072A900EDC2BE /* base_model.Population.cpp */,
+				8BC4DD85219072A900EDC2BE /* base_model.Population.h */,
+				8BC4DD93219072AA00EDC2BE /* main.cpp */,
+				8BC4DD8B219072A900EDC2BE /* main.h */,
+				8BC4DD9F2190798C00EDC2BE /* genotype.cpp */,
+				8BC4DDA02190798C00EDC2BE /* genotype.h */,
+				8BC4DD8A219072A900EDC2BE /* misc.cpp */,
+				8BC4DD8C219072A900EDC2BE /* misc.h */,
+				8BC4DD84219072A900EDC2BE /* probability.cpp */,
+				8BC4DD94219072AA00EDC2BE /* probability.h */,
 			);
 			path = covfefe_executable;
 			sourceTree = "<group>";
@@ -119,7 +166,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8BC4DD7B2190702C00EDC2BE /* main.cpp in Sources */,
+				8BC4DD97219072AA00EDC2BE /* base_model.Deme.cpp in Sources */,
+				8BC4DD9D219072AA00EDC2BE /* base_model.Mosquito.cpp in Sources */,
+				8BC4DD9E219072AA00EDC2BE /* main.cpp in Sources */,
+				8BC4DD9B219072AA00EDC2BE /* base_model.Host.cpp in Sources */,
+				8BC4DD95219072AA00EDC2BE /* base_model.Parameters.cpp in Sources */,
+				8BC4DD9C219072AA00EDC2BE /* base_model.Dispatcher.cpp in Sources */,
+				8BC4DD98219072AA00EDC2BE /* base_model.Population.cpp in Sources */,
+				8BC4DD96219072AA00EDC2BE /* probability.cpp in Sources */,
+				8BC4DD99219072AA00EDC2BE /* misc.cpp in Sources */,
+				8BC4DDA12190798C00EDC2BE /* genotype.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,7 +1,11 @@
 
 #pragma once
 
+#include "misc.h"
+
+#ifdef RCPP_ACTIVE
 #include <Rcpp.h>
+#endif
 
 //------------------------------------------------
 // parameters of individual-based simulation model
@@ -21,7 +25,7 @@ public:
   static double r;
   static std::vector<double> b;
   static double c;
-  static std::vector<int> Ih_vec;
+  static std::vector<int> Eh_vec;
   static std::vector<int> H_vec;
   static std::vector<int> M_vec;
   static int max_innoculations;
@@ -39,7 +43,9 @@ public:
   // PUBLIC FUNCTIONS
   
   // constructors
-  Parameters() {};
+  Parameters();
+#ifdef RCPP_ACTIVE
   Parameters(const Rcpp::List &args);
+#endif
   
 };

@@ -1,9 +1,11 @@
 
+#include "main.h"
 #include "base_model.Parameters.h"
 #include "base_model.Dispatcher.h"
-#include "misc.h"
 #include "probability.h"
 #include "genotype.h"
+
+#include <chrono>
 
 using namespace std;
 
@@ -11,7 +13,17 @@ using namespace std;
 // main function (when not run using Rcpp)
 #ifndef RCPP_ACTIVE
 int main(int argc, const char * argv[]) {
+  
+  // start timer
+  chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
+  
+  // run simulation
   indiv_sim_cpp();
+  
+  // end timer
+  chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
+  chrono::duration<double> time_span = chrono::duration_cast< chrono::duration<double> >(t2-t1);
+  print("completed in", time_span.count(), "seconds\n");
 }
 #endif
 
@@ -30,16 +42,9 @@ Rcpp::List indiv_sim_cpp(Rcpp::List args) {
   // carry out simulation
   dispatcher.simulate();
   
-  return Rcpp::List::create(Rcpp::Named("Sh_store") = dispatcher.demes[0].Sh_store);
-  /*
-  // return results as list
-  return Rcpp::List::create(Rcpp::Named("Sh_store") = indiv_sim.Sh_store,
-                            Rcpp::Named("Ih_store") = indiv_sim.Ih_store,
-  Rcpp::Named("EIR_store") = indiv_sim.EIR_store,
-  Rcpp::Named("innoculations") = indiv_sim.innoculations_full,
-  Rcpp::Named("infection_history") = indiv_sim.history_full);
-  */
-  
+  return Rcpp::List::create(Rcpp::Named("Sh_store") = dispatcher.Sh_store,
+                            Rcpp::Named("Eh_store") = dispatcher.Eh_store,
+                            Rcpp::Named("Ih_store") = dispatcher.Ih_store);
 }
 #else
 int indiv_sim_cpp() {
@@ -57,6 +62,7 @@ int indiv_sim_cpp() {
 }
 #endif
 
+/*
 //------------------------------------------------
 // simulate population and draw blood stage hosts at designated times
 // [[Rcpp::export]]
@@ -455,5 +461,5 @@ Rcpp::List sim_genotypes_cpp(Rcpp::List &samp_hosts_raw, Rcpp::List &args) {
   Rcpp::List ret = Rcpp::List::create(Rcpp::Named("genotypes") = genotypes);
   return ret;
 }
-
+*/
 

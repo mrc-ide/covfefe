@@ -16,49 +16,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// draw_hosts_cpp
-Rcpp::List draw_hosts_cpp(Rcpp::List& infection_history, Rcpp::List& args);
-RcppExport SEXP _covfefe_draw_hosts_cpp(SEXP infection_historySEXP, SEXP argsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::List& >::type infection_history(infection_historySEXP);
-    Rcpp::traits::input_parameter< Rcpp::List& >::type args(argsSEXP);
-    rcpp_result_gen = Rcpp::wrap(draw_hosts_cpp(infection_history, args));
-    return rcpp_result_gen;
-END_RCPP
-}
-// prune_cpp
-Rcpp::List prune_cpp(Rcpp::List& infection_history, Rcpp::List& samp_hosts_raw, Rcpp::List& args);
-RcppExport SEXP _covfefe_prune_cpp(SEXP infection_historySEXP, SEXP samp_hosts_rawSEXP, SEXP argsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::List& >::type infection_history(infection_historySEXP);
-    Rcpp::traits::input_parameter< Rcpp::List& >::type samp_hosts_raw(samp_hosts_rawSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List& >::type args(argsSEXP);
-    rcpp_result_gen = Rcpp::wrap(prune_cpp(infection_history, samp_hosts_raw, args));
-    return rcpp_result_gen;
-END_RCPP
-}
-// sim_genotypes_cpp
-Rcpp::List sim_genotypes_cpp(Rcpp::List& samp_hosts_raw, Rcpp::List& args);
-RcppExport SEXP _covfefe_sim_genotypes_cpp(SEXP samp_hosts_rawSEXP, SEXP argsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::List& >::type samp_hosts_raw(samp_hosts_rawSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List& >::type args(argsSEXP);
-    rcpp_result_gen = Rcpp::wrap(sim_genotypes_cpp(samp_hosts_raw, args));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_covfefe_indiv_sim_cpp", (DL_FUNC) &_covfefe_indiv_sim_cpp, 1},
-    {"_covfefe_draw_hosts_cpp", (DL_FUNC) &_covfefe_draw_hosts_cpp, 2},
-    {"_covfefe_prune_cpp", (DL_FUNC) &_covfefe_prune_cpp, 3},
-    {"_covfefe_sim_genotypes_cpp", (DL_FUNC) &_covfefe_sim_genotypes_cpp, 2},
     {NULL, NULL, 0}
 };
 

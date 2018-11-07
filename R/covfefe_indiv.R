@@ -23,7 +23,7 @@
 #'   infected mosquito.
 #' @param c probability a mosquito becomes infected after biting an infected
 #'   human.
-#' @param Ih_init vector or scalar specifying initial number of infectious
+#' @param Eh_init vector or scalar specifying the initial number of infected
 #'   humans in each deme. If scalar then the same value is used for all demes.
 #' @param H vector or scalar specifying human population size in each deme. If 
 #'   scalar then the same value is used for all demes. Alternatively, if
@@ -33,7 +33,7 @@
 #'   number of adult female mosquitoes) in each deme. If scalar then the same
 #'   value is used for all demes.
 #' @param max_innoculations maximum number of innoculations that an individual
-#'   can experience before becoming completely immune.
+#'   can hold simultaneously.
 #' @param migration_matrix matrix giving the probability of migrating from 
 #'   current deme (in rows) to new deme (in columns). Diagonal elements are
 #'   ignored.
@@ -53,7 +53,7 @@
 #' @examples
 #' # TODO
 
-sim_indiv <- function(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 10, v = 10, g = 10, r = 1/20, b = 1, c = 1, Ih_init = 10, H = 1000, M = 1000, max_innoculations = 5, migration_matrix = matrix(1), H_auto = FALSE, demog = dgeom(1:100, prob=1/20), output_counts = TRUE, output_innoculations = TRUE, output_infection_history = FALSE, silent = FALSE) {
+sim_indiv <- function(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 10, v = 10, g = 10, r = 1/20, b = 1, c = 1, Eh_init = 10, H = 1000, M = 1000, max_innoculations = 5, migration_matrix = matrix(1), H_auto = FALSE, demog = dgeom(1:100, prob=1/20), output_counts = TRUE, output_innoculations = TRUE, output_infection_history = FALSE, silent = FALSE) {
   
   # check arguments
   assert_pos_int(max_time, zero_allowed = FALSE)
@@ -66,7 +66,7 @@ sim_indiv <- function(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 10, v 
   assert_pos(r)
   assert_bounded(b)
   assert_bounded(c)
-  assert_pos_int(Ih_init)
+  assert_pos_int(Eh_init)
   assert_pos_int(H, zero_allowed = FALSE)
   assert_pos_int(M)
   assert_pos_int(max_innoculations, zero_allowed = FALSE)
@@ -74,7 +74,7 @@ sim_indiv <- function(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 10, v 
   assert_bounded(migration_matrix)
   assert_that(all(rowSums(migration_matrix) <= 1), msg = "row sums of migration matrix cannot exceed 1")
   n_demes <- nrow(migration_matrix)
-  assert_in(length(Ih_init), c(1, n_demes))
+  assert_in(length(Eh_init), c(1, n_demes))
   assert_in(length(H), c(1, n_demes))
   assert_in(length(M), c(1, n_demes))
   assert_logical(H_auto)
@@ -84,10 +84,10 @@ sim_indiv <- function(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 10, v 
   assert_logical(output_infection_history)
   
   # force some scalar inputs to vector
-  Ih_init <- force_vector(Ih_init, n_demes)
+  Eh_init <- force_vector(Eh_init, n_demes)
   H <- force_vector(H, n_demes)
   M <- force_vector(M, n_demes)
-  assert_leq(Ih_init, H)
+  assert_leq(Eh_init, H)
   
   # fill in migration matrix diagonal elements and test if there is any migration
   diag(migration_matrix) <- 0
@@ -153,7 +153,7 @@ sim_indiv <- function(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 10, v 
                r = r,
                b = b,
                c = c,
-               Ih_init = Ih_init,
+               Eh_init = Eh_init,
                H = H,
                M = M,
                max_innoculations = max_innoculations,
@@ -170,6 +170,8 @@ sim_indiv <- function(max_time = 365, a = 0.3, p = 0.9, mu = -log(p), u = 10, v 
   
   # run efficient C++ function
   output_raw <- indiv_sim_cpp(args)
+  
+  message(sprintf("completed in %s seconds", round(Sys.time() - t0, 2))) 
   
   return(output_raw)
   

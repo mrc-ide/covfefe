@@ -5,15 +5,3 @@ indiv_sim_cpp <- function(args) {
     .Call('_covfefe_indiv_sim_cpp', PACKAGE = 'covfefe', args)
 }
 
-draw_hosts_cpp <- function(infection_history, args) {
-    .Call('_covfefe_draw_hosts_cpp', PACKAGE = 'covfefe', infection_history, args)
-}
-
-prune_cpp <- function(infection_history, samp_hosts_raw, args) {
-    .Call('_covfefe_prune_cpp', PACKAGE = 'covfefe', infection_history, samp_hosts_raw, args)
-}
-
-sim_genotypes_cpp <- function(samp_hosts_raw, args) {
-    .Call('_covfefe_sim_genotypes_cpp', PACKAGE = 'covfefe', samp_hosts_raw, args)
-}
-
