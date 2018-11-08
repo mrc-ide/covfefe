@@ -2,7 +2,6 @@
 #pragma once
 
 #include "misc.h"
-#include "base_model.Parameters.h"
 #include "base_model.Population.h"
 #include "base_model.Host.h"
 #include "base_model.Mosquito.h"
@@ -13,7 +12,7 @@
 
 //------------------------------------------------
 // single deme of individual-based simulation model
-class Deme : public Population, public Parameters {
+class Deme : public Population {
   
 public:
   

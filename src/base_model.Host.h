@@ -25,9 +25,8 @@ public:
   // host properties
   double beta;
   int next_event_time;
-  
-  // list of innoculations
-  //std::list<Innoculation> innoculations;
+  int birth_day;
+  int death_day;
   
   // innoculation objects
   std::vector<bool> innoc_active;
@@ -40,11 +39,9 @@ public:
   
   // innoculation counts
   int cumulative_n_innoculations;
-  int n_innoculations;
   int n_latent;
   int n_bloodstage;
   int n_infective;
-  int n_asexual;
   
   
   // PUBLIC FUNCTIONS
@@ -53,8 +50,11 @@ public:
   Host();
   
   // methods
+  void reset(int ID, int birth_day, int death_day);
   void new_innoculation(int t);
   void enact_events(int t, std::vector<int> &host_infective_vec, int this_host);
   void summary();
+  int get_n_innoculations();
+  int get_n_asexual();
   
 };

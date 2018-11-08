@@ -2,16 +2,10 @@
 % Please edit documentation in R/covfefe_project.R
 \name{covfefe_project}
 \alias{covfefe_project}
-\title{Create covfefe project}
+\title{Define empty covfefe project}
 \usage{
 covfefe_project()
 }
 \description{
-Create covfefe project
-}
-\details{
-TODO
-}
-\examples{
-# TODO
+Define empty covfefe project
 }

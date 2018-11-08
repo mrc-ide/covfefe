@@ -116,6 +116,7 @@ void Deme::human_infection(int this_host, Mosquito &mosq, int t) {
 //------------------------------------------------
 // move time forward one step
 void Deme::step_forward(int t) {
+  
   /*
   // clear history lists
   if (output_infection_history) {
@@ -215,16 +216,20 @@ void Deme::step_forward(int t) {
     }
   }
   
+  
+  //-------- SCHEDULED EVENTS --------
+  
   // carry out scheduled events
   for (int i=0; i<int(host_vec.size()); i++) {
     int this_host = host_vec[i];
+    
+    // check for death
+    enact_death(this_host, t);
+    
+    // enact epidemiological events
     hosts[this_host].enact_events(t, host_infective_vec, i);
   }
   
-  //if (t == 2000) {
-  //  int this_host = host_vec[0];
-  //  hosts[this_host].summary();
-  //}
   
   /*
   // add to infection history

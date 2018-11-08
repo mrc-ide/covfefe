@@ -1,45 +1,41 @@
 
 #------------------------------------------------
-#' @title Create covfefe project
+#' @title Define empty covfefe project
 #'
-#' @description Create covfefe project
-#'
-#' @details TODO
+#' @description Define empty covfefe project
 #'
 #' @export
-#' @examples
-#' # TODO
 
 covfefe_project <- function() {
-
-  # TODO - do we need parameters?
-  parameters <- list(foo = -9)
-
-  # create new project
-  ret <- list(parameters = parameters,
-              infection_history = NULL,
-              pop_counts = NULL,
-              samp_mat = NULL,
-              samp_hosts = NULL,
-              pruned_tree = NULL,
-              distributions = NULL,
-              genotypes = NULL)
-
-  # create class
-  class(ret) <- "covfefe_project"
-
-  # return invisibly
-  invisible(ret)
+  
+  # create null project
+  project <- list(sim_parameters = NULL,
+                  sim_output = NULL)
+  class(project) <- "covfefe_project"
+  
+  # define default epi parameters
+  project <- define_epi_parameters(project)
+  
+  # define default deme parameters
+  project <- define_deme_parameters(project)
+  
+  # define default demography
+  project <- define_demography(project)
+  
+  # define default migration parameters
+  project <- define_migration(project)
+  
+  # return
+  invisible(project)
 }
 
 #------------------------------------------------
 # overload print() function for covfefe_project
-# (not exported)
-
+#' @noRd
 print.covfefe_project <- function(x, ...) {
-
-  # print without class name
-  print(unclass(x))
+  
+  # print summary
+  summary(x)
   
   # return invisibly
   invisible(x)
@@ -47,20 +43,9 @@ print.covfefe_project <- function(x, ...) {
 
 #------------------------------------------------
 # overload summary() function for covfefe_project
-# (not exported)
-
+#' @noRd
 summary.covfefe_project <- function(x, ...) {
-
-  print("TODO")
-
-  # return invisibly
-  invisible(x)
-}
-
-#------------------------------------------------
-# determine if object is of class covfefe_project
-# (not exported)
-
-is.covfefe_project <- function(x) {
-  inherits(x, "covfefe_project")
+  
+  message("TODO")
+  
 }

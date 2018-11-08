@@ -16,36 +16,35 @@ Dispatcher::Dispatcher() {
   population = Population(H);
   
   // create vector of demes
-  demes = vector<Deme>(n_demes);
-  for (int k=0; k<n_demes; ++k) {
-    demes[k] = Deme(k);
-  }
+  //demes = vector<Deme>(n_demes);
+  //for (int k=0; k<n_demes; ++k) {
+  //  demes[k] = Deme(k);
+  //}
   
   // initialise all demes (assign hosts and seed infections)
-  int tmp = 0;
-  for (int k=0; k<n_demes; ++k) {
-    vector<int> hosts_k = seq_int(tmp, tmp+H_vec[k]-1);
-    tmp += H_vec[k];
-    demes[k].init(hosts_k, Eh_vec[k]);
-  }
-  
-  // initialise objects for implementing migration. Store IDs of infective and
-  // non-infective hosts that will move demes in a given time step
-  //mig_inf_hosts = array_int(demes, demes);
-  //mig_noninf_hosts = array_int(demes, demes);
+  //int tmp = 0;
+  //for (int k=0; k<n_demes; ++k) {
+  //  vector<int> hosts_k = seq_int(tmp, tmp+H_vec[k]-1);
+  //  tmp += H_vec[k];
+  //  demes[k].init(hosts_k, seed_infections[k]);
+  //}
   
   // initialise objects for storing daily counts of key quantities
   if (output_counts) {
-    Sh_store = vector<vector<int>>(n_demes, vector<int>(max_time));
-    Eh_store = vector<vector<int>>(n_demes, vector<int>(max_time));
-    Ih_store = vector<vector<int>>(n_demes, vector<int>(max_time));
-    //EIR_store = vector<vector<double>>(n_demes, vector<double>(max_time));
+    Sh_store = vector<vector<int>>(n_demes, vector<int>(max_time+1));
+    Eh_store = vector<vector<int>>(n_demes, vector<int>(max_time+1));
+    Ih_store = vector<vector<int>>(n_demes, vector<int>(max_time+1));
+    EIR_store = vector<vector<double>>(n_demes, vector<double>(max_time+1));
     
+    // counts at time 0
     for (int k=0; k<n_demes; ++k) {
-      Sh_store[k][0] = H_vec[k] - Eh_vec[k];
-      Eh_store[k][0] = Eh_vec[k];
+      Sh_store[k][0] = H_vec[k] - seed_infections[k];
+      Eh_store[k][0] = seed_infections[k];
     }
   }
+  
+  // initialise objects for storing age distributions
+  Ih_age_store = vector<vector<vector<int>>>(n_demes, vector<vector<int>>(n_output_age_times, vector<int>(n_demography)));
   
 }
 
@@ -54,12 +53,13 @@ Dispatcher::Dispatcher() {
 void Dispatcher::simulate() {
   
   // loop through daily time steps
-  for (int t=1; t<max_time; t++) {
+  int output_age_time_index = 0;
+  for (int t=1; t<=max_time; t++) {
     
     // step forward in all demes
-    for (int k=0; k<n_demes; ++k) {
-      demes[k].step_forward(t);
-    }
+    //for (int k=0; k<n_demes; ++k) {
+    //  demes[k].step_forward(t);
+    //}
     
     // store daily counts of key quantities
     if (output_counts) {
@@ -67,7 +67,7 @@ void Dispatcher::simulate() {
         int this_deme = population.hosts[i].deme;
         
         // store susceptible count
-        if (population.hosts[i].n_asexual == 0) {
+        if (population.hosts[i].get_n_asexual() == 0) {
           Sh_store[this_deme][t]++;
         }
         
@@ -81,11 +81,34 @@ void Dispatcher::simulate() {
           Ih_store[this_deme][t]++;
         }
       }
+      
+      // store EIR
+      for (int k=0; k<n_demes; ++k) {
+        //EIR_store[k][t] = demes[k].EIR;
+      }
+      
       //print(t, Sh_store[0][t]);
     }
     
-    if (t == 1000) {
-      //population.hosts[0].summary();
+    // store complete age distributions
+    if (output_age_times[output_age_time_index] == t) {
+      
+      // 
+      for (int i=0; i<H; ++i) {
+        int this_deme = population.hosts[i].deme;
+        
+        // store bloodstage count
+        if (population.hosts[i].n_bloodstage > 0) {
+          int age_days = t - population.hosts[i].birth_day;
+          int age_years = floor(age_days/365.0);
+          Ih_age_store[this_deme][output_age_time_index][age_years]++;
+        }
+      }
+      
+      // update output_age_time_index
+      if (output_age_time_index < (output_age_times.size()-1)) {
+        output_age_time_index++;
+      }
     }
     
   } // end time loop

@@ -35,6 +35,7 @@ Rcpp::List indiv_sim_cpp(Rcpp::List args) {
   
   // extract model parameters into separate class
   Parameters parameters(args);
+  //parameters.print_summary();
   
   // create simulation dispatcher object
   Dispatcher dispatcher;
@@ -44,7 +45,9 @@ Rcpp::List indiv_sim_cpp(Rcpp::List args) {
   
   return Rcpp::List::create(Rcpp::Named("Sh_store") = dispatcher.Sh_store,
                             Rcpp::Named("Eh_store") = dispatcher.Eh_store,
-                            Rcpp::Named("Ih_store") = dispatcher.Ih_store);
+                            Rcpp::Named("Ih_store") = dispatcher.Ih_store,
+                            Rcpp::Named("EIR_store") = dispatcher.EIR_store,
+                            Rcpp::Named("Ih_age_store") = dispatcher.Ih_age_store);
 }
 #else
 int indiv_sim_cpp() {

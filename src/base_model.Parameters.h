@@ -15,8 +15,7 @@ public:
   
   // PUBLIC OBJECTS
   
-  // model parameters
-  static int max_time;
+  // epidemiological parameters
   static double a;
   static double mu;
   static int u;
@@ -25,20 +24,32 @@ public:
   static double r;
   static std::vector<double> b;
   static double c;
-  static std::vector<int> Eh_vec;
-  static std::vector<int> H_vec;
-  static std::vector<int> M_vec;
   static int max_innoculations;
-  static std::vector<std::vector<double>> delta_mig;
-  static std::vector<double> demog;
-  static bool output_counts;
-  static bool output_innoculations;
-  static bool output_infection_history;
+  
+  // deme parameters
+  static std::vector<int> H_vec;
+  static std::vector<int> seed_infections;
+  static std::vector<int> M_vec;
   static int n_demes;
   
-  // daily probability of mosquito death
-  static double prob_v_death;
-  static double prob_h_recovery;
+  // demography
+  static std::vector<double> demography;
+  static int n_demography;
+  
+  // migration
+  // TODO
+  
+  // run parameters
+  static int max_time;
+  static bool output_counts;
+  static std::vector<int> output_age_times;
+  static int n_output_age_times;
+  static bool output_infection_history;
+  
+  // misc parameters
+  static double prob_v_death;  // daily probability of mosquito death
+  static double prob_h_recovery;  // daily probability of human recovery
+  
   
   // PUBLIC FUNCTIONS
   
@@ -47,5 +58,8 @@ public:
 #ifdef RCPP_ACTIVE
   Parameters(const Rcpp::List &args);
 #endif
+  
+  // methods
+  void print_summary();
   
 };
