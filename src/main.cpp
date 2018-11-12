@@ -14,16 +14,9 @@ using namespace std;
 #ifndef RCPP_ACTIVE
 int main(int argc, const char * argv[]) {
   
-  // start timer
-  chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
-  
   // run simulation
   indiv_sim_cpp();
   
-  // end timer
-  chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
-  chrono::duration<double> time_span = chrono::duration_cast< chrono::duration<double> >(t2-t1);
-  print("completed in", time_span.count(), "seconds\n");
 }
 #endif
 
@@ -32,6 +25,9 @@ int main(int argc, const char * argv[]) {
 #ifdef RCPP_ACTIVE
 // [[Rcpp::export]]
 Rcpp::List indiv_sim_cpp(Rcpp::List args) {
+  
+  // start timer
+  chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
   
   // extract model parameters into separate class
   Parameters parameters(args);
@@ -43,14 +39,30 @@ Rcpp::List indiv_sim_cpp(Rcpp::List args) {
   // carry out simulation
   dispatcher.simulate();
   
-  return Rcpp::List::create(Rcpp::Named("Sh_store") = dispatcher.Sh_store,
-                            Rcpp::Named("Eh_store") = dispatcher.Eh_store,
-                            Rcpp::Named("Ih_store") = dispatcher.Ih_store,
+  // end timer
+  chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
+  chrono::duration<double> time_span = chrono::duration_cast< chrono::duration<double> >(t2-t1);
+  print("completed in", time_span.count(), "seconds\n");
+  
+  return Rcpp::List::create(Rcpp::Named("H_store") = dispatcher.H_store,
+                            Rcpp::Named("Sh_store") = dispatcher.Sh_store,
+                            Rcpp::Named("Lh_store") = dispatcher.Lh_store,
+                            Rcpp::Named("Ah_store") = dispatcher.Ah_store,
+                            Rcpp::Named("Ch_store") = dispatcher.Ch_store,
                             Rcpp::Named("EIR_store") = dispatcher.EIR_store,
-                            Rcpp::Named("Ih_age_store") = dispatcher.Ih_age_store);
+                            Rcpp::Named("H_age_store") = dispatcher.H_age_store,
+                            Rcpp::Named("prev_Sh_age_store") = dispatcher.prev_Sh_age_store,
+                            Rcpp::Named("prev_Lh_age_store") = dispatcher.prev_Lh_age_store,
+                            Rcpp::Named("prev_Ah_age_store") = dispatcher.prev_Ah_age_store,
+                            Rcpp::Named("prev_Ch_age_store") = dispatcher.prev_Ch_age_store,
+                            Rcpp::Named("inc_Lh_age_store") = dispatcher.inc_Lh_age_store,
+                            Rcpp::Named("inc_Ah_age_store") = dispatcher.inc_Ah_age_store);
 }
 #else
 int indiv_sim_cpp() {
+  
+  // start timer
+  chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
   
   // extract model parameters into separate class
   Parameters parameters;
@@ -60,6 +72,11 @@ int indiv_sim_cpp() {
   
   // carry out simulation
   dispatcher.simulate();
+  
+  // end timer
+  chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
+  chrono::duration<double> time_span = chrono::duration_cast< chrono::duration<double> >(t2-t1);
+  print("completed in", time_span.count(), "seconds\n");
   
   return 0;
 }

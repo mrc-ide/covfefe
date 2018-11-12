@@ -116,6 +116,26 @@ int sample1(vector<double> &p, const double p_sum) {
 }
 
 //------------------------------------------------
+// equivalent to sample1, but ignores first values of p until min_val is reached
+int sample1b(vector<double> &p, double p_sum, int min_val) {
+  if (min_val == 1) {
+    return sample1(p, p_sum);
+  }
+  for (int i=0; i<(min_val-1); ++i) {
+    p_sum -= p[i];
+  }
+  double rand = p_sum*runif_0_1();
+  double z = 0;
+  for (int i=(min_val-1); i<int(p.size()); i++) {
+    z += p[i];
+    if (rand<z) {
+      return i+1;
+    }
+  }
+  return 0;
+}
+
+//------------------------------------------------
 // sample single value x that lies between a and b (inclusive) with equal 
 // probability. Works on positive or negative values of a or b, and works 
 // irrespective of which of a or b is larger.

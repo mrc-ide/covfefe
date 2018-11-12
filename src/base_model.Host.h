@@ -2,7 +2,6 @@
 #pragma once
 
 #include "misc.h"
-#include "base_model.Parameters.h"
 
 #ifdef RCPP_ACTIVE
 #include <Rcpp.h>
@@ -11,8 +10,12 @@
 #include <list>
 
 //------------------------------------------------
+// enumerate possible host status
+enum Status {Inactive, Latent, Acute, Chronic, Treated};
+
+//------------------------------------------------
 // class defining host
-class Host : public Parameters {
+class Host {
   
 public:
   
@@ -23,15 +26,16 @@ public:
   int deme;
   
   // host properties
-  double beta;
-  int next_event_time;
+  int b_index;
+  int prob_acute_index;
+  int duration_acute_index;
+  int duration_chronic_index;
   int birth_day;
   int death_day;
   
   // innoculation objects
   std::vector<bool> innoc_active;
-  std::vector<int> innoc_ID;
-  std::vector<int> innoc_status;
+  std::vector<Status> innoc_status;
   std::vector<int> innoc_status_update_time;
   std::vector<bool> innoc_infective;
   std::vector<int> innoc_infective_start_time;
@@ -40,19 +44,21 @@ public:
   // innoculation counts
   int cumulative_n_innoculations;
   int n_latent;
-  int n_bloodstage;
+  int n_acute;
+  int n_chronic;
   int n_infective;
   
   
   // PUBLIC FUNCTIONS
   
   // constructors
-  Host();
+  Host() {};
+  Host(int max_innoculations);
   
   // methods
-  void reset(int ID, int birth_day, int death_day);
-  void new_innoculation(int t);
-  void enact_events(int t, std::vector<int> &host_infective_vec, int this_host);
+  void reset(int ID, int deme, int birth_day, int death_day);
+  int get_innoculation_slot();
+  void new_innoculation(int slot, int t);
   void summary();
   int get_n_innoculations();
   int get_n_asexual();

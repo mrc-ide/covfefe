@@ -14,9 +14,17 @@ double Parameters::mu;
 int Parameters::u;
 int Parameters::v;
 int Parameters::g;
-double Parameters::r;
 vector<double> Parameters::b;
-double Parameters::c;
+int Parameters::n_b;
+vector<double> Parameters::prob_acute;
+int Parameters::n_prob_acute;
+double Parameters::prob_AC;
+vector<vector<double>> Parameters::duration_acute;
+int Parameters::n_duration_acute;
+vector<vector<double>> Parameters::duration_chronic;
+int Parameters::n_duration_chronic;
+double Parameters::infectivity_acute;
+double Parameters::infectivity_chronic;
 int Parameters::max_innoculations;
 
 // deme parameters
@@ -26,22 +34,24 @@ vector<int> Parameters::M_vec;
 int Parameters::n_demes;
 
 // demography
-vector<double> Parameters::demography;
-int Parameters::n_demography;
+vector<double> Parameters::life_table;
+vector<double> Parameters::age_death;
+vector<double> Parameters::age_stable;
+int Parameters::n_age;
 
 // migration
 // TODO
 
 // run parameters
 int Parameters::max_time;
-bool Parameters::output_counts;
+bool Parameters::output_daily_counts;
+bool Parameters::output_age_distributions;
 vector<int> Parameters::output_age_times;
 int Parameters::n_output_age_times;
 bool Parameters::output_infection_history;
 
 // misc parameters
 double Parameters::prob_v_death;
-double Parameters::prob_h_recovery;
 
 //------------------------------------------------
 // constructor
@@ -58,9 +68,17 @@ Parameters::Parameters() {
   u = 10;
   v = 10;
   g = 10;
-  r = 1.0/20;
   b = vector<double>(1, 1.0);
-  c = 1.0;
+  n_b = int(b.size());
+  prob_acute = vector<double>(1, 1.0);
+  n_prob_acute = int(prob_acute.size());
+  prob_AC = 0.5;
+  duration_acute = vector<vector<double>>(1, vector<double>(0.1, 10));
+  n_duration_acute = int(duration_clinical.size());
+  duration_chronic = vector<vector<double>>(1, vector<double>(0.1, 10));
+  n_duration_chronic = int(duration_chronic.size());
+  infectivity_acute = 1.0;
+  infectivity_chronic = 0.5;
   max_innoculations = 5;
   
   // deme parameters
@@ -71,22 +89,24 @@ Parameters::Parameters() {
   n_demes = n_demes0;
   
   // demography
-  demography = {100};
-  n_demography = int(demography.size());
+  life_table = {1};
+  age_death = {1};
+  age_stable = {1};
+  n_age = int(age_stable.size());
   
   // migration
   // (TODO)
   
   // run parameters
   max_time = 365*5;
-  output_counts = true;
+  output_daily_counts = true;
+  output_age_distributions = true;
   output_age_times = {max_time};
   n_output_age_times = int(output_age_times.size());
   output_infection_history = false;
   
   // misc parameters
   prob_v_death = 1 - exp(-mu);  // daily probability of mosquito death
-  prob_h_recovery = 1 - exp(-r);  // daily probability of human recovery
   
 }
 #endif
@@ -103,9 +123,17 @@ Parameters::Parameters(const Rcpp::List &args) {
   u = rcpp_to_int(args_epi_parameters["u"]);
   v = rcpp_to_int(args_epi_parameters["v"]);
   g = rcpp_to_int(args_epi_parameters["g"]);
-  r = rcpp_to_double(args_epi_parameters["r"]);
   b = rcpp_to_vector_double(args_epi_parameters["b"]);
-  c = rcpp_to_double(args_epi_parameters["c"]);
+  n_b = int(b.size());
+  prob_acute = rcpp_to_vector_double(args_epi_parameters["prob_acute"]);
+  n_prob_acute = int(prob_acute.size());
+  prob_AC = rcpp_to_double(args_epi_parameters["prob_AC"]);
+  duration_acute = rcpp_to_matrix_double(args_epi_parameters["duration_acute"]);
+  n_duration_acute = int(duration_acute.size());
+  duration_chronic = rcpp_to_matrix_double(args_epi_parameters["duration_chronic"]);
+  n_duration_chronic = int(duration_chronic.size());
+  infectivity_acute = rcpp_to_double(args_epi_parameters["infectivity_acute"]);
+  infectivity_chronic = rcpp_to_double(args_epi_parameters["infectivity_chronic"]);
   max_innoculations = rcpp_to_int(args_epi_parameters["max_innoculations"]);
   
   // deme parameters
@@ -116,8 +144,11 @@ Parameters::Parameters(const Rcpp::List &args) {
   n_demes = int(H_vec.size());
   
   // demography
-  demography = rcpp_to_vector_double(args["demography"]);
-  n_demography = int(demography.size());
+  Rcpp::List args_demography = args["demography"];
+  life_table = rcpp_to_vector_double(args_demography["life_table"]);
+  age_death = rcpp_to_vector_double(args_demography["age_death"]);
+  age_stable = rcpp_to_vector_double(args_demography["age_stable"]);
+  n_age = int(age_stable.size());
   
   // migration
   // (TODO)
@@ -125,14 +156,14 @@ Parameters::Parameters(const Rcpp::List &args) {
   // run parameters
   Rcpp::List args_run_parameters = args["run_parameters"];
   max_time = rcpp_to_int(args_run_parameters["max_time"]);
-  output_counts = rcpp_to_bool(args_run_parameters["output_counts"]);
+  output_daily_counts = rcpp_to_bool(args_run_parameters["output_daily_counts"]);
+  output_age_distributions = rcpp_to_bool(args_run_parameters["output_age_distributions"]);
   output_age_times = rcpp_to_vector_int(args_run_parameters["output_age_times"]);
   n_output_age_times = int(output_age_times.size());
   output_infection_history = rcpp_to_bool(args_run_parameters["output_infection_history"]);
   
   // misc parameters
   prob_v_death = 1 - exp(-mu);  // daily probability of mosquito death
-  prob_h_recovery = 1 - exp(-r);  // daily probability of human recovery
   
 }
 #endif
@@ -148,10 +179,13 @@ void Parameters::print_summary() {
   print("u: ", u);
   print("v: ", v);
   print("g: ", g);
-  print("r: ", r);
   print("b: ");
   print_vector(b);
-  print("c: ", c);
+  print("prob_acute: ");
+  print_vector(prob_acute);
+  print("prob_AC: ", prob_AC);
+  print("infectivity_acute: ", infectivity_acute);
+  print("infectivity_chronic: ", infectivity_chronic);
   print("max_innoculations: ", max_innoculations);
   print("");
   
@@ -168,9 +202,13 @@ void Parameters::print_summary() {
   
   // demography
   print("-- demography --");
-  print("demography: ");
-  print_vector(demography);
-  print("n_demography: ", n_demography);
+  print("life_table: ");
+  print_vector(life_table);
+  print("age_death: ");
+  print_vector(age_death);
+  print("age_stable: ");
+  print_vector(age_stable);
+  print("n_age: ", n_age);
   print("");
   
   // migration
@@ -181,7 +219,8 @@ void Parameters::print_summary() {
   // run parameters
   print("-- run parameters --");
   print("max_time: ", max_time);
-  print("output_counts: ", output_counts);
+  print("output_daily_counts: ", output_daily_counts);
+  print("output_age_distributions: ", output_age_distributions);
   print("output_age_times: ");
   print_vector(output_age_times);
   print("n_output_age_times: ", n_output_age_times);
@@ -191,6 +230,5 @@ void Parameters::print_summary() {
   // misc parameters
   print("-- misc parameters --");
   print("prob_v_death: ", prob_v_death);
-  print("prob_h_recovery: ", prob_h_recovery);
   print("");
 }

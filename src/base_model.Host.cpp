@@ -5,13 +5,12 @@
 using namespace std;
 
 //------------------------------------------------
-// default constructor for host class
-Host::Host() {
+// constructor
+Host::Host(int max_innoculations) {
   
   // initialise innoculation objects
   innoc_active = vector<bool>(max_innoculations);
-  innoc_ID = vector<int>(max_innoculations);
-  innoc_status = vector<int>(max_innoculations);
+  innoc_status = vector<Status>(max_innoculations);
   innoc_status_update_time = vector<int>(max_innoculations);
   innoc_infective = vector<bool>(max_innoculations);
   innoc_infective_start_time = vector<int>(max_innoculations);
@@ -21,22 +20,23 @@ Host::Host() {
 
 //------------------------------------------------
 // reset host parameters
-void Host::reset(int ID, int birth_day, int death_day) {
+void Host::reset(int ID, int deme, int birth_day, int death_day) {
   
   // unique ID and record of current deme
   this->ID = ID;
-  deme = 0;
+  this->deme = deme;
   
   // host properties
-  beta = b[0];
-  next_event_time = max_time+1;
+  b_index = 0;
+  prob_acute_index = 0;
+  duration_acute_index = 0;
+  duration_chronic_index = 0;
   this->birth_day = birth_day;
   this->death_day = death_day;
   
   // innoculation objects
   fill(innoc_active.begin(), innoc_active.end(), false);
-  fill(innoc_ID.begin(), innoc_ID.end(), 0);
-  fill(innoc_status.begin(), innoc_status.end(), 0);
+  fill(innoc_status.begin(), innoc_status.end(), Inactive);
   fill(innoc_status_update_time.begin(), innoc_status_update_time.end(), 0);
   fill(innoc_infective.begin(), innoc_infective.end(), false);
   fill(innoc_infective_start_time.begin(), innoc_infective_start_time.end(), 0);
@@ -45,132 +45,35 @@ void Host::reset(int ID, int birth_day, int death_day) {
   // innoculation counts
   cumulative_n_innoculations = 0;
   n_latent = 0;
-  n_bloodstage = 0;
+  n_acute = 0;
+  n_chronic = 0;
   n_infective = 0;
 }
 
-
 //------------------------------------------------
-// new innoculation
-void Host::new_innoculation(int t) {
+// get next free innoculation slot. Return -1 if no free slot
+int Host::get_innoculation_slot() {
   
-  // abort if reached max innoculations
-  if (get_n_innoculations() == max_innoculations) {
-    return;
-  }
-  
-  // find next free innoculation slot
-  int next_innoculation = 0;
-  for (int i=0; i<max_innoculations; ++i) {
+  for (int i=0; i<int(innoc_active.size()); ++i) {
     if (!innoc_active[i]) {
-      next_innoculation = i;
-      break;
+      return i;
     }
   }
-  
-  // add new innoculation
-  innoc_active[next_innoculation] = true;
-  innoc_ID[next_innoculation] = cumulative_n_innoculations;
-  innoc_status[next_innoculation] = 0;
-  innoc_status_update_time[next_innoculation] = t+u;
-  innoc_infective[next_innoculation] = false;
-  innoc_infective_start_time[next_innoculation] = t+u+g;
-  innoc_infective_stop_time[next_innoculation] = max_time+1;
-  
-  // update next event time
-  if (t+u < next_event_time) {
-    next_event_time = t+u;
-  }
-  
-  // update counts
-  cumulative_n_innoculations++;
-  n_latent++;
-  
-  // update infection probability
-  if (cumulative_n_innoculations < b.size()) {
-    beta = b[cumulative_n_innoculations];
-  } else {
-    beta = b[b.size()-1];
-  }
+  return -1;
 }
 
 //------------------------------------------------
-// enact scheduled events
-void Host::enact_events(int t, vector<int> &host_infective_vec, int this_host) {
+// new innoculation, scheduled to transition to blood-stage at time t
+void Host::new_innoculation(int slot, int t) {
   
-  // enact events scheduled for time t
-  if (t != next_event_time) {
-    return;
-  }
+  // update latent count
+  n_latent++;
   
-  // store whether infective before updating
-  bool infective_before = (n_infective > 0);
-  
-  // update all active innoculations
-  for (int i=0; i<max_innoculations; ++i) {
-    if (innoc_active[i]) {
-      
-      // if due status update
-      if (innoc_status_update_time[i] == t) {
-        switch (innoc_status[i]) {
-          case 0:  // latent become blood-stage
-            innoc_status_update_time[i] += rgeom1(r)+1;
-            n_latent--;
-            n_bloodstage++;
-            break;
-            
-          case 1:  // blood-stage recover
-            innoc_status_update_time[i] = max_time+1;
-            innoc_infective_stop_time[i] = t+g;
-            n_bloodstage--;
-            break;
-            
-          default:
-            break;
-        }
-        innoc_status[i]++;
-      }
-      
-      // if due infective status update
-      if (innoc_infective_start_time[i] == t) {
-        innoc_infective[i] = true;
-        n_infective++;
-      }
-      if (innoc_infective_stop_time[i] == t) {
-        innoc_active[i] = false;
-        n_infective--;
-      }
-      
-    }
-  }
-  
-  // recalculate next_event_time
-  next_event_time = max_time+1;
-  for (int i=0; i<max_innoculations; ++i) {
-    if (innoc_active[i]) {
-      if (innoc_status_update_time[i] < next_event_time) {
-        next_event_time = innoc_status_update_time[i];
-      }
-      if (innoc_infective[i]) {
-        if (innoc_infective_stop_time[i] < next_event_time) {
-          next_event_time = innoc_infective_stop_time[i];
-        }
-      } else {
-        if (innoc_infective_start_time[i] < next_event_time) {
-          next_event_time = innoc_infective_start_time[i];
-        }
-      }
-    }
-  }
-  
-  // apply change in infective status
-  bool infective_after = (n_infective > 0);
-  if (!infective_before && infective_after) {  // newly infective
-    host_infective_vec.push_back(this_host);
-  }
-  if (infective_before && !infective_after) {  // newly uninfective
-    host_infective_vec.erase(remove(host_infective_vec.begin(), host_infective_vec.end(), this_host));
-  }
+  // add new innoculation
+  innoc_active[slot] = true;
+  innoc_status[slot] = Latent;
+  innoc_status_update_time[slot] = t;
+  innoc_infective[slot] = false;
   
 }
 
@@ -179,12 +82,19 @@ void Host::enact_events(int t, vector<int> &host_infective_vec, int this_host) {
 void Host::summary() {
   print("ID: ", ID);
   print("deme: ", deme);
-  print("beta: ", beta);
-  print("next_event_time: ", next_event_time);
+  print("b_index: ", b_index);
+  print("prob_acute_index: ", prob_acute_index);
+  print("duration_acute_index: ", duration_acute_index);
+  print("birth_day: ", birth_day);
+  print("death_day: ", death_day);
+  print("");
+  
   print("cumulative_n_innoculations: ", cumulative_n_innoculations);
   print("n_latent: ", n_latent);
-  print("n_bloodstage: ", n_bloodstage);
+  print("n_acute: ", n_acute);
+  print("n_chronic: ", n_chronic);
   print("n_infective: ", n_infective);
+  print("");
   
   print_vector(innoc_active);
   print_vector(innoc_status);
@@ -198,11 +108,11 @@ void Host::summary() {
 //------------------------------------------------
 // get total number of innoculations
 int Host::get_n_innoculations() {
-  return n_latent + n_bloodstage + n_infective;
+  return n_latent + n_acute + n_chronic + n_infective;
 }
 
 //------------------------------------------------
 // get total number of asexual innoculations
 int Host::get_n_asexual() {
-  return n_latent + n_bloodstage;
+  return n_latent + n_acute + n_chronic;
 }

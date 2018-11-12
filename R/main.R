@@ -27,11 +27,23 @@ NULL
 #'   becoming infectious in a mosquito.
 #' @param g lag time between human blood-stage infection and production of
 #'   gametocytes.
-#' @param r daily recovery rate.
 #' @param b probability a human becomes infected after being bitten by an
 #'   infected mosquito.
-#' @param c probability a mosquito becomes infected after biting an infected
-#'   human.
+#' @param prob_acute probability an infection goes through an acute phase.
+#' @param prob_AC probability of acute infection transitioning to chronic before
+#'   clearing, as opposed to clearing directly.
+#' @param duration_acute vector or list specifying probability distribution of
+#'   time (in days) of acute phase of disease. If a list then the first element
+#'   specifies the distribution for the first incident of acute disease, the
+#'   second element for the second incident of acute disease and so on (the
+#'   final distribution is used for all remaining incidents). If a vector then
+#'   the same distribution is used for all incidents of acute disease.
+#' @param duration_chronic equivalent to \code{duration_acute} but for chronic
+#'   phase of disease.
+#' @param infectivity_acute probability a mosquito becomes infected after biting
+#'   a human host in the acute phase.
+#' @param infectivity_chronic probability a mosquito becomes infected after
+#'   biting a human host in the chronic phase.
 #' @param max_innoculations maximum number of innoculations that an individual
 #'   can hold simultaneously.
 #'
@@ -44,9 +56,13 @@ define_epi_parameters <- function(project,
                                   u = 10,
                                   v = 10,
                                   g = 10,
-                                  r = 1/200,
                                   b = 1,
-                                  c = 1,
+                                  prob_acute = c(1,0.5,0),
+                                  prob_AC = 0.2,
+                                  duration_acute = dgeom(1:100, 1/20),
+                                  duration_chronic = dgeom(1:300, 1/100),
+                                  infectivity_acute = 1,
+                                  infectivity_chronic = 0.5,
                                   max_innoculations = 5) {
   
   # check inputs
@@ -59,12 +75,33 @@ define_epi_parameters <- function(project,
   assert_single_pos_int(u, zero_allowed = FALSE)
   assert_single_pos_int(v, zero_allowed = FALSE)
   assert_single_pos_int(g, zero_allowed = FALSE)
-  assert_single_pos(r)
   assert_pos(b)
   assert_bounded(b)
-  assert_single_pos(c)
-  assert_bounded(c)
+  assert_pos(prob_acute)
+  assert_bounded(prob_acute)
+  assert_single_pos(prob_AC)
+  assert_bounded(prob_AC)
+  if (!is.list(duration_acute)) {
+    duration_acute <- list(duration_acute)
+  }
+  mapply(assert_pos, duration_acute)
+  if (!is.list(duration_chronic)) {
+    duration_chronic <- list(duration_chronic)
+  }
+  mapply(assert_pos, duration_chronic)
+  assert_single_pos(infectivity_acute)
+  assert_bounded(infectivity_acute)
+  assert_single_pos(infectivity_chronic)
+  assert_bounded(infectivity_chronic)
   assert_single_pos_int(max_innoculations, zero_allowed = FALSE)
+  
+  # normalise distributions
+  for (i in 1:length(duration_acute)) {
+    duration_acute[[i]] <- duration_acute[[i]]/sum(duration_acute[[i]])
+  }
+  for (i in 1:length(duration_chronic)) {
+    duration_chronic[[i]] <- duration_chronic[[i]]/sum(duration_chronic[[i]])
+  }
   
   # modify project
   project$sim_parameters$epi_parameters <- list(a = a,
@@ -73,9 +110,13 @@ define_epi_parameters <- function(project,
                                                 u = u,
                                                 v = v,
                                                 g = g,
-                                                r = r,
                                                 b = b,
-                                                c = c,
+                                                prob_acute = prob_acute,
+                                                prob_AC = prob_AC,
+                                                duration_acute = duration_acute,
+                                                duration_chronic = duration_chronic,
+                                                infectivity_acute = infectivity_acute,
+                                                infectivity_chronic = infectivity_chronic,
                                                 max_innoculations = max_innoculations)
   
   # return
@@ -121,23 +162,60 @@ define_deme_parameters <- function(project,
 #------------------------------------------------
 #' @title Define simulation demographic parameters
 #'
-#' @description Define simulation demographic parameters
+#' @description Define deography used in simulation. The raw input is a life
+#'   table giving the probability of death in each one-year age group. This in
+#'   turn is used to derive the distribution of age of death, and the stable age
+#'   distribution.
 #'
 #' @param project covfefe project.
-#' @param demography vector specifying proportion of the population in each
-#'   one-year age group.
+#' @param life_table vector specifying probability of death in each one-year age
+#'   group. Final value must be 1 to ensure a closed population.
 #'
 #' @export
 
-define_demography <- function(project,
-                              demography = dgeom(1:100, prob = 1/20)) {
+define_demograpy <- function(project,
+                             life_table = NULL) {
   
   # check inputs
   assert_custom_class(project, "covfefe_project")
-  assert_pos(demography)
+  if (is.null(life_table)) {
+    life_table <- covfefe_file("mali_life_table.rds")
+  }
+  assert_pos(life_table)
+  assert_bounded(life_table)
+  assert_eq(life_table[length(life_table)], 1, message = "the final value in the life table must be 1, representing a 100%% chance of dying, to ensure a closed population")
+  
+  # compute distribution of age of death
+  n <- length(life_table)
+  age_death <- rep(0,n)
+  remaining <- 1
+  for (i in 1:n) {
+    age_death[i] <- remaining*life_table[i]
+    remaining <- remaining*(1 - life_table[i])
+  }
+  
+  # convert life table to transition matrix
+  m <- matrix(0,n,n)
+  m[col(m) == (row(m)+1)] <- 1 - life_table[1:(n-1)]
+  m[,1] <- 1 - rowSums(m)
+  
+  # convert to rates
+  r = m - diag(n)
+  
+  # compute Eigenvalues of the rate matrix
+  E = eigen(t(r))
+  
+  # there should be one Eigenvalue that is zero (up to limit of computational
+  # precision). Find which Eigenvalue this is
+  w <- which.min(abs(E$values))
+  
+  # the stable solution is the corresponding Eigenvector, suitably normalised
+  age_stable <- Re(E$vectors[,w]/sum(E$vectors[,w]))
   
   # modify project
-  project$sim_parameters$demography <- demography/sum(demography)
+  project$sim_parameters$demography <- list(life_table = life_table,
+                                            age_death = age_death,
+                                            age_stable = age_stable)
   
   # return
   invisible(project)
@@ -172,8 +250,9 @@ define_migration <- function(project,
 #' @description Simulate from simple individual-based model
 #'
 #' @param max_time run simulation for this many days.
-#' @param output_counts whether to output daily counts of key quantities, such
-#'   as the number of infected hosts and the EIR.
+#' @param output_daily_counts whether to output daily counts of key quantities,
+#'   such as the number of infected hosts and the EIR.
+#' @param output_age_distributions whether to output complete age distributions
 #' @param output_age_times a vector of times at which complete age distributions
 #'   are output.
 #' @param output_infection_history whether to output complete infection history.
@@ -183,7 +262,8 @@ define_migration <- function(project,
 
 run_sim <- function(project,
                     max_time = 365,
-                    output_counts = TRUE,
+                    output_daily_counts = TRUE,
+                    output_age_distributions = TRUE,
                     output_age_times = max_time,
                     output_infection_history = FALSE,
                     silent = FALSE) {
@@ -191,73 +271,66 @@ run_sim <- function(project,
   # check inputs
   assert_custom_class(project, "covfefe_project")
   assert_single_pos_int(max_time)
-  assert_single_logical(output_counts)
+  assert_single_logical(output_daily_counts)
+  assert_single_logical(output_age_distributions)
   assert_vector(output_age_times)
   assert_pos_int(output_age_times)
   assert_leq(output_age_times, max_time)
   assert_single_logical(output_infection_history)
   assert_single_logical(silent)
   
+  # get useful quantities
+  n_demes <- length(project$sim_parameters$deme_parameters$H)
+  
   # create argument list
   args <- project$sim_parameters
   args$run_parameters <- list(max_time = max_time,
-                              output_counts = output_counts,
+                              output_daily_counts = output_daily_counts,
+                              output_age_distributions = output_age_distributions,
                               output_age_times = output_age_times,
                               output_infection_history = output_infection_history,
                               silent = silent)
   
-  # start timer
-  t0 <- Sys.time()
-  
   # run efficient C++ function
   output_raw <- indiv_sim_cpp(args)
   
-  message(sprintf("completed in %s seconds", round(Sys.time() - t0, 2))) 
-  
-  return(output_raw)
-  
-  # create return object
-  ret <- list()
-  class(ret) <- "covfefe_indiv"
-  
-  # process counts
-  if (output_counts) {
-    counts <- list()
+  # process daily counts etc.
+  daily_counts <- NULL
+  if (output_daily_counts) {
+    daily_counts <- list()
     for (k in 1:n_demes) {
-      Sh_store <- output_raw$Sh_store[[k]]
-      Ih_store <- output_raw$Ih_store[[k]]
-      EIR_store <- output_raw$EIR_store[[k]]
-      counts[[k]] <- cbind(time = 1:max_time, 
-                           Sh = Sh_store,
-                           Ih = Ih_store,
-                           EIR = EIR_store)
+      daily_counts[[k]] <- data.frame(H = output_raw$H_store[[k]],
+                                      Sh = output_raw$Sh_store[[k]],
+                                      Lh = output_raw$Lh_store[[k]],
+                                      Ah = output_raw$Ah_store[[k]],
+                                      Ch = output_raw$Ch_store[[k]],
+                                      EIR = output_raw$EIR_store[[k]])
     }
-    names(counts) <- paste0("deme", 1:n_demes)
-    ret$counts <- counts
+    names(daily_counts) <- paste0("deme", 1:n_demes)
   }
   
-  # process innoculations
-  if (output_innoculations) {
-    innoculations <- list()
-    for (k in 1:n_demes) {
-      raw_innoculations <- rcpp_to_mat(output_raw$innoculations[[k]])
-      colnames(raw_innoculations) <- paste0("Ih", 0:max_innoculations)
-      innoculations[[k]] <- cbind(time = 1:max_time,
-                                  raw_innoculations)
+  # process age distribution
+  age_distributions <- NULL
+  if (output_age_distributions) {
+    age_distributions <- list()
+    for (i in 1:length(output_age_times)) {
+      age_distributions[[i]] <- list()
+      for (k in 1:n_demes) {
+        age_distributions[[i]][[k]] <- data.frame(H = output_raw$H_age_store[[k]][[i]],
+                                                  prev_Sh = output_raw$prev_Sh_age_store[[k]][[i]],
+                                                  prev_Lh = output_raw$prev_Lh_age_store[[k]][[i]],
+                                                  prev_Ah = output_raw$prev_Ah_age_store[[k]][[i]],
+                                                  prev_Ch = output_raw$prev_Ch_age_store[[k]][[i]],
+                                                  inc_Lh = output_raw$inc_Lh_age_store[[k]][[i]],
+                                                  inc_Ah = output_raw$inc_Ah_age_store[[k]][[i]])
+      }
     }
-    names(innoculations) <- paste0("deme", 1:n_demes)
-    ret$innoculations <- innoculations
   }
   
-  # process infection history
-  if (output_infection_history) {
-    ret$infection_history <- output_raw$infection_history
-  }
+  ret <- list(daily_counts = daily_counts,
+              age_distributions = age_distributions)
   
-  # end timer
-  if (!silent) {
-    message(sprintf("completed in %s seconds", round(Sys.time() - t0, 2))) 
-  }
+  return(ret)
   
   # return invisibly
   invisible(ret)

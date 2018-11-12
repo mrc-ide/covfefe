@@ -38,6 +38,10 @@ double rexp1(const double r);
 int sample1(std::vector<double> &p, const double pSum=1.0);
 
 //------------------------------------------------
+// equivalent to sample1, but ignores first values of p until min_val is reached
+int sample1b(std::vector<double> &p, double p_sum, int min_val);
+
+//------------------------------------------------
 // sample single value x that lies between a and b (inclusive) with equal 
 // probability. Works on positive or negative values of a or b, and works 
 // irrespective of which of a or b is larger.

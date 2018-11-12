@@ -19,8 +19,8 @@ covfefe_project <- function() {
   # define default deme parameters
   project <- define_deme_parameters(project)
   
-  # define default demography
-  project <- define_demography(project)
+  # define default life table
+  project <- define_demograpy(project)
   
   # define default migration parameters
   project <- define_migration(project)

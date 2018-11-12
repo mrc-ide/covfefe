@@ -5,14 +5,16 @@
 \title{Simulate from simple individual-based model}
 \usage{
 run_sim(project, max_time = 365, output_counts = TRUE,
-  output_age_times = max_time, output_infection_history = FALSE,
-  silent = FALSE)
+  output_age_distributions = TRUE, output_age_times = max_time,
+  output_infection_history = FALSE, silent = FALSE)
 }
 \arguments{
 \item{max_time}{run simulation for this many days.}
 
 \item{output_counts}{whether to output daily counts of key quantities, such
 as the number of infected hosts and the EIR.}
+
+\item{output_age_distributions}{whether to output complete age distributions}
 
 \item{output_age_times}{a vector of times at which complete age distributions
 are output.}

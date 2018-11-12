@@ -15,7 +15,7 @@
 covfefe_file <- function(name) {
 
   # load file from inst/extdata folder
-  name_full <- system.file("extdata/", name, package='covfefe', mustWork = TRUE)
+  name_full <- system.file("extdata/", name, package = 'covfefe', mustWork = TRUE)
   ret <- readRDS(name_full)
 
   # return

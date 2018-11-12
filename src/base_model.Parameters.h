@@ -21,9 +21,17 @@ public:
   static int u;
   static int v;
   static int g;
-  static double r;
   static std::vector<double> b;
-  static double c;
+  static int n_b;
+  static std::vector<double> prob_acute;
+  static int n_prob_acute;
+  static double prob_AC;
+  static std::vector<std::vector<double>> duration_acute;
+  static int n_duration_acute;
+  static std::vector<std::vector<double>> duration_chronic;
+  static int n_duration_chronic;
+  static double infectivity_acute;
+  static double infectivity_chronic;
   static int max_innoculations;
   
   // deme parameters
@@ -33,22 +41,24 @@ public:
   static int n_demes;
   
   // demography
-  static std::vector<double> demography;
-  static int n_demography;
+  static std::vector<double> life_table;
+  static std::vector<double> age_death;
+  static std::vector<double> age_stable;
+  static int n_age;
   
   // migration
   // TODO
   
   // run parameters
   static int max_time;
-  static bool output_counts;
+  static bool output_daily_counts;
+  static bool output_age_distributions;
   static std::vector<int> output_age_times;
   static int n_output_age_times;
   static bool output_infection_history;
   
   // misc parameters
   static double prob_v_death;  // daily probability of mosquito death
-  static double prob_h_recovery;  // daily probability of human recovery
   
   
   // PUBLIC FUNCTIONS
