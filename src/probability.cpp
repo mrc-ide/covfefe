@@ -80,7 +80,7 @@ vector<int> rmultinom1(const int n, vector<double> &p) {
 }
 
 //------------------------------------------------
-// draw from Geometric(p) distribution
+// draw from Geometric(p) distribution, with mean (1-p)/p
 int rgeom1(const double p) {
 #ifdef RCPP_ACTIVE
   return R::rgeom(p);

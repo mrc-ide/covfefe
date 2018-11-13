@@ -62,7 +62,7 @@ define_epi_parameters <- function(project,
                                   duration_acute = dgeom(1:100, 1/20),
                                   duration_chronic = dgeom(1:300, 1/100),
                                   infectivity_acute = 1,
-                                  infectivity_chronic = 0.5,
+                                  infectivity_chronic = 1,
                                   max_innoculations = 5) {
   
   # check inputs
@@ -89,9 +89,9 @@ define_epi_parameters <- function(project,
     duration_chronic <- list(duration_chronic)
   }
   mapply(assert_pos, duration_chronic)
-  assert_single_pos(infectivity_acute)
+  assert_pos(infectivity_acute)
   assert_bounded(infectivity_acute)
-  assert_single_pos(infectivity_chronic)
+  assert_pos(infectivity_chronic)
   assert_bounded(infectivity_chronic)
   assert_single_pos_int(max_innoculations, zero_allowed = FALSE)
   

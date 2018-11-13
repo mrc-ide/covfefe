@@ -3,6 +3,8 @@
 
 #define RCPP_ACTIVE
 
+#define OLD_VERSION
+
 #ifdef RCPP_ACTIVE
 #include <Rcpp.h>
 #endif
