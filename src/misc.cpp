@@ -209,6 +209,14 @@ double rcpp_to_double(SEXP x) {
 
 //------------------------------------------------
 #ifdef RCPP_ACTIVE
+// converts input from Rcpp::SEXP format to string format.
+string rcpp_to_string(SEXP x) {
+  return Rcpp::as<string>(x);
+}
+#endif
+
+//------------------------------------------------
+#ifdef RCPP_ACTIVE
 // converts input from Rcpp::List format to vector<bool> format.
 vector<bool> rcpp_to_vector_bool(SEXP x) {
   return Rcpp::as<vector<bool> >(x);

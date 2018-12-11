@@ -27,8 +27,8 @@ NULL
 #'   becoming infectious in a mosquito.
 #' @param g lag time between human blood-stage infection and production of
 #'   gametocytes.
-#' @param b probability a human becomes infected after being bitten by an
-#'   infected mosquito.
+#' @param prob_infection probability a human becomes infected after being bitten
+#'   by an infected mosquito.
 #' @param prob_acute probability an infection goes through an acute phase.
 #' @param prob_AC probability of acute infection transitioning to chronic before
 #'   clearing, as opposed to clearing directly.
@@ -51,18 +51,18 @@ NULL
 
 define_epi_parameters <- function(project,
                                   a = 0.3,
-                                  p = 0.9,
+                                  p = 0.85,
                                   mu = -log(p),
-                                  u = 10,
+                                  u = 12,
                                   v = 10,
-                                  g = 10,
-                                  b = 1,
+                                  g = 12,
+                                  prob_infection = 0.6,
                                   prob_acute = c(1,0.5,0),
                                   prob_AC = 0.2,
-                                  duration_acute = dgeom(1:100, 1/20),
-                                  duration_chronic = dgeom(1:300, 1/100),
-                                  infectivity_acute = 1,
-                                  infectivity_chronic = 1,
+                                  duration_acute = dgeom(1:25, 1/5),
+                                  duration_chronic = dgeom(1:1000, 1/200),
+                                  infectivity_acute = 0.07,
+                                  infectivity_chronic = 0.07,
                                   max_innoculations = 5) {
   
   # check inputs
@@ -75,8 +75,8 @@ define_epi_parameters <- function(project,
   assert_single_pos_int(u, zero_allowed = FALSE)
   assert_single_pos_int(v, zero_allowed = FALSE)
   assert_single_pos_int(g, zero_allowed = FALSE)
-  assert_pos(b)
-  assert_bounded(b)
+  assert_pos(prob_infection)
+  assert_bounded(prob_infection)
   assert_pos(prob_acute)
   assert_bounded(prob_acute)
   assert_single_pos(prob_AC)
@@ -110,7 +110,7 @@ define_epi_parameters <- function(project,
                                                 u = u,
                                                 v = v,
                                                 g = g,
-                                                b = b,
+                                                prob_infection = prob_infection,
                                                 prob_acute = prob_acute,
                                                 prob_AC = prob_AC,
                                                 duration_acute = duration_acute,
@@ -266,6 +266,7 @@ run_sim <- function(project,
                     output_age_distributions = TRUE,
                     output_age_times = max_time,
                     output_infection_history = FALSE,
+                    filepath_migration,
                     silent = FALSE) {
   
   # check inputs
@@ -277,10 +278,12 @@ run_sim <- function(project,
   assert_pos_int(output_age_times)
   assert_leq(output_age_times, max_time)
   assert_single_logical(output_infection_history)
+  assert_single_string(filepath_migration)
   assert_single_logical(silent)
   
   # get useful quantities
   n_demes <- length(project$sim_parameters$deme_parameters$H)
+  n_output_age_times <- length(output_age_times)
   
   # create argument list
   args <- project$sim_parameters
@@ -289,6 +292,7 @@ run_sim <- function(project,
                               output_age_distributions = output_age_distributions,
                               output_age_times = output_age_times,
                               output_infection_history = output_infection_history,
+                              filepath_migration = filepath_migration,
                               silent = silent)
   
   # run efficient C++ function
@@ -304,7 +308,10 @@ run_sim <- function(project,
                                       Lh = output_raw$Lh_store[[k]],
                                       Ah = output_raw$Ah_store[[k]],
                                       Ch = output_raw$Ch_store[[k]],
-                                      EIR = output_raw$EIR_store[[k]])
+                                      Sv = output_raw$Sv_store[[k]],
+                                      Lv = output_raw$Lv_store[[k]],
+                                      Iv = output_raw$Iv_store[[k]],
+                                      EIR = output_raw$EIR_store[[k]]*365)
     }
     names(daily_counts) <- paste0("deme", 1:n_demes)
   }
@@ -313,18 +320,34 @@ run_sim <- function(project,
   age_distributions <- NULL
   if (output_age_distributions) {
     age_distributions <- list()
-    for (i in 1:length(output_age_times)) {
-      age_distributions[[i]] <- list()
-      for (k in 1:n_demes) {
-        age_distributions[[i]][[k]] <- data.frame(H = output_raw$H_age_store[[k]][[i]],
-                                                  prev_Sh = output_raw$prev_Sh_age_store[[k]][[i]],
-                                                  prev_Lh = output_raw$prev_Lh_age_store[[k]][[i]],
-                                                  prev_Ah = output_raw$prev_Ah_age_store[[k]][[i]],
-                                                  prev_Ch = output_raw$prev_Ch_age_store[[k]][[i]],
-                                                  inc_Lh = output_raw$inc_Lh_age_store[[k]][[i]],
-                                                  inc_Ah = output_raw$inc_Ah_age_store[[k]][[i]])
+    for (k in 1:n_demes) {
+      age_distributions[[k]] <- list()
+      for (i in 1:n_output_age_times) {
+        H_age <- output_raw$H_age_store[[k]][[i]]
+        Sh_age <- output_raw$Sh_age_store[[k]][[i]]
+        Lh_age <- output_raw$Lh_age_store[[k]][[i]]
+        Ah_age <- output_raw$Ah_age_store[[k]][[i]]
+        Ch_age <- output_raw$Ch_age_store[[k]][[i]]
+        prev_Lh_age <- Lh_age/H_age
+        prev_Ah_age <- Ah_age/H_age
+        prev_Ch_age <- Ch_age/H_age
+        inc_Lh_age <- output_raw$inc_Lh_age_store[[k]][[i]]*365
+        inc_Ah_age <- output_raw$inc_Ah_age_store[[k]][[i]]*365
+        
+        age_distributions[[k]][[i]] <- data.frame(H = H_age,
+                                                  Sh = Sh_age,
+                                                  Lh = Lh_age,
+                                                  Ah = Ah_age,
+                                                  Ch = Ch_age,
+                                                  prev_Lh = prev_Lh_age,
+                                                  prev_Ah = prev_Ah_age,
+                                                  prev_Ch = prev_Ch_age,
+                                                  inc_Lh = inc_Lh_age,
+                                                  inc_Ah = inc_Ah_age)
       }
+      names(age_distributions[[k]]) <- paste0("time", 1:n_output_age_times)
     }
+    names(age_distributions) <- paste0("deme", 1:n_demes)
   }
   
   ret <- list(daily_counts = daily_counts,

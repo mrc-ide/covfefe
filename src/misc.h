@@ -3,8 +3,6 @@
 
 #define RCPP_ACTIVE
 
-#define OLD_VERSION
-
 #ifdef RCPP_ACTIVE
 #include <Rcpp.h>
 #endif
@@ -257,6 +255,12 @@ int rcpp_to_int(SEXP x);
 #ifdef RCPP_ACTIVE
 // converts input from Rcpp::SEXP format to double format.
 double rcpp_to_double(SEXP x);
+#endif
+
+//------------------------------------------------
+#ifdef RCPP_ACTIVE
+// converts input from Rcpp::SEXP format to string format.
+std::string rcpp_to_string(SEXP x);
 #endif
 
 //------------------------------------------------

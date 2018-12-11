@@ -92,8 +92,8 @@ public:
   static int u;
   static int v;
   static int g;
-  static std::vector<double> b;
-  static int n_b;
+  static std::vector<double> prob_infection;
+  static int n_prob_infection;
   static std::vector<double> prob_acute;
   static int n_prob_acute;
   static double prob_AC;
@@ -129,6 +129,8 @@ public:
   static std::vector<int> output_age_times;
   static int n_output_age_times;
   static bool output_infection_history;
+  static std::string filepath_migration;
+  
   
   // misc parameters
   static double prob_v_death;  // daily probability of mosquito death
